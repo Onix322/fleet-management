@@ -9,7 +9,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.AllArgsConstructor;
 
-@Path("/vehicle")
+import java.util.UUID;
+
+@Path("/vehicle/van")
 @AllArgsConstructor(onConstructor_ = @Inject)
 @Singleton
 public class VanResource {
@@ -29,5 +31,27 @@ public class VanResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
         return Response.ok(vanService.getAll()).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getById(@PathParam("id") UUID id) {
+        return Response.ok(vanService.getById(id)).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response update(@PathParam("id") UUID id, Van van) {
+        return Response.ok(vanService.update(id, van)).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response delete(@PathParam("id") UUID id) {
+        return Response.ok(vanService.delete(id)).build();
     }
 }
