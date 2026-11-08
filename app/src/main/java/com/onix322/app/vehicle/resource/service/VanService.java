@@ -7,6 +7,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @Singleton
 @AllArgsConstructor(onConstructor_ = @Inject)
 public class VanService {
@@ -14,5 +16,9 @@ public class VanService {
 
     public Van create(Van van) {
         return vanRepository.save(van);
+    }
+
+    public List<Van> getAll() {
+        return vanRepository.findAll();
     }
 }
