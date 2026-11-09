@@ -1,18 +1,16 @@
 package com.onix322.app.vehicle.resource.model;
 
 import com.onix322.app.vehicle.util.OwnershipType;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.sql.Date;
 
 @EqualsAndHashCode(callSuper = true)
-@MappedSuperclass
+@Entity
 @Data
+@DiscriminatorValue("motorized")
 public class VehicleMotorized  extends VehicleAbstract {
 
     @Column(name = "last_pti")

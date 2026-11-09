@@ -1,14 +1,20 @@
 package com.onix322.app.vehicle.resource.model;
 
+import com.onix322.app.image.resource.model.ImageDamage;
+import com.onix322.app.image.resource.model.ImageProfile;
 import com.onix322.app.vehicle.util.OwnershipType;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Date;
+import java.util.List;
 import java.util.UUID;
 
-@MappedSuperclass
 @Data
+@Table(name = "vehicle")
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "vehicle_type")
 public abstract class VehicleAbstract implements Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -30,4 +36,9 @@ public abstract class VehicleAbstract implements Vehicle {
     @Column(name = "registration_date")
     private Date registrationDate;
 
+    @OneToMany
+    private List<ImageProfile> imageProfileList;
+
+    @OneToMany
+    private List<ImageDamage> imageDamageList;
 }
