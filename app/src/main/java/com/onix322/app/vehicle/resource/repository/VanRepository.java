@@ -1,6 +1,5 @@
 package com.onix322.app.vehicle.resource.repository;
 
-import com.onix322.app.vehicle.resource.model.Vehicle;
 import com.onix322.app.vehicle.resource.model.impl.Van;
 import com.onix322.database.repository.BaseRepository;
 import jakarta.inject.Singleton;
