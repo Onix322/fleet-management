@@ -45,10 +45,7 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public T save(T entity) {
-        return orm.executeWithResult(em -> {
-            em.persist(entity);
-            return entity;
-        });
+        return orm.executeWithResult(em -> em.merge(entity));
     }
 
     public T update(T entity) {
