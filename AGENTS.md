@@ -5,12 +5,21 @@ source of truth for what may and may not be done without approval, and for
 the conventions the codebase and documentation must follow.
 
 ## Approval-required actions
-- **Code**: show the exact diff and get approval before applying any
-  code change.
+- **AGENTS.md (highest priority)**: this file is the most important file
+  in the repository. It must NOT be modified, deleted, or renamed without
+  my explicit prior approval of the exact change (diff shown first).
+- **Code**: before applying ANY code change — creating, editing, or
+  deleting any code file — you must first present the exact diff
+  (before → after) and wait for my explicit approval. Nothing is
+  applied without it.
 - **Documentation**: when a code change affects documentation, propose the
   documentation updates alongside the code diff and get the same approval.
-- **Git**: `commit`, `push`, and branch creation only with explicit yes/no
-  approval.
+- **Git**: ANY git command that creates, updates, edits, modifies, or deletes
+  repository state — e.g. `commit`, `push`, `branch` (create/rename/delete),
+  `tag` (create/delete), `merge`, `rebase`, `reset`, `amend`, `checkout`,
+  `restore`, `rm`, `mv`, `stash`, `cherry-pick` — must be presented with its
+  exact command and explicitly approved before it is run. Read-only git
+  commands (`status`, `log`, `diff`, `branch -v`, ...) are exempt.
 - Do not run destructive shell commands that bypass the diff-approval rule.
 
 ## Scope exclusion
