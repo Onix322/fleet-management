@@ -11,6 +11,11 @@ the conventions the codebase and documentation must follow.
   documentation updates alongside the code diff and get the same approval.
 - **Git**: `commit`, `push`, and branch creation only with explicit yes/no
   approval.
+- **Rebuild & restart**: never rebuild or restart the application without
+  explicit approval. Before proposing a rebuild + restart, state the plan
+  and the reason it is needed. Only the user performs the rebuild and
+  restart — unless the user explicitly instructs the agent to rebuild and
+  test the running application live until it works.
 - Do not run destructive shell commands that bypass the diff-approval rule.
 
 ## Scope exclusion
@@ -67,7 +72,8 @@ the conventions the codebase and documentation must follow.
   runtime verification.
 - The running application listens on `localhost:8080`; PostgreSQL is on
   `5432`. After code changes the running process must be rebuilt and
-  restarted; the stale process will not reflect new annotations or bindings.
+  restarted (by the user, per the approval rule above); the stale process
+  will not reflect new annotations or bindings.
 - After rebuilding, verify:
   ```sh
   curl -i -X POST 'http://localhost:8080/create' \

@@ -187,8 +187,8 @@ A concrete repository only needs `@Singleton` and a constructor Guice can call �
 
 `BaseRepository` provides `find`, `findAll`, `save`, `update`, `delete`, `count` and `exists`. Each method runs in its own transaction.
 
-- `save` inserts with `persist`;
-- `update` merges an existing or detached entity;
+- `save` upserts with `merge` — inserts a new entity, updates an existing one;
+- `update` has the same semantics and upserts with `merge`;
 - custom queries use `orm.execute` or `orm.executeWithResult` directly.
 
 The recommendation is to extend `BaseRepository` for standard CRUD and to use `ORM` directly when a use case needs more control: explicit queries, locking, flush timing, batch operations, or custom session semantics. Both can be used in the same repository class — the inherited methods are ordinary `ORM` transactions, so inherited CRUD and custom `orm.execute(...)` calls coexist without conflict.
@@ -273,7 +273,34 @@ The resource is discovered automatically because it is under `com.onix322.app`.
 
 Resources are created by Jersey/HK2, not by Guice. Use `jakarta.inject.Inject` on the resource constructor — HK2 does not recognize `com.google.inject.Inject` there. Do not bind the resource class in a Guice module; Jersey manages its lifecycle, and the HK2 bridge resolves the service dependency from Guice.
 
-### 5.6 Feature module
+### 5.6 Polymorphic entity types
+
+When a feature has several entity types that share a common shape — for example `ExampleA` and `ExampleB` both extending an abstract `ExampleAbstract` — one REST endpoint can accept and return the shared type, and Jackson resolves the concrete subtype from a discriminator property in the JSON body.
+
+Annotate the abstract entity:
+
+```java
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = ExampleA.class, name = "a"),
+    @JsonSubTypes.Type(value = ExampleB.class, name = "b"),
+})
+public abstract class ExampleAbstract {
+    // shared fields
+}
+```
+
+Effect on the JSON contract:
+
+- every request and response body for the feature carries the `"type"` discriminator;
+- the value of `"type"` selects the concrete subtype (`"a"` → `ExampleA`, `"b"` → `ExampleB`);
+- a value not registered in `@JsonSubTypes` is rejected by Jackson.
+
+To add a subtype, declare the concrete entity and register it in `@JsonSubTypes`; no other wiring is needed. If the hierarchy is persisted in a single table, the JPA mapping stays independent: `@Inheritance(SINGLE_TABLE)` plus `@DiscriminatorColumn` decides how rows are stored, while the Jackson annotations only shape the JSON.
+
+Because `BaseRepository.save` and `update` upsert through `merge`, the pattern round-trips cleanly: a body carrying an existing identifier updates that row, a new identifier inserts one.
+
+### 5.7 Feature module
 
 The module registers the persisted entities of the feature. Services and repositories with a `@Singleton` annotation and an injectable constructor do not need an explicit binding; Guice creates them just in time.
 
@@ -297,7 +324,7 @@ Add explicit bindings only when the injector cannot infer the target: an interfa
 
 Add every persisted entity of the feature to the same multibinder. The framework collects them and passes the complete set to Hibernate.
 
-### 5.7 Install the module
+### 5.8 Install the module
 
 Install the feature module from `App`:
 
@@ -316,7 +343,7 @@ public class App extends AbstractModule {
 }
 ```
 
-### 5.8 Verify
+### 5.9 Verify
 
 After starting the application:
 

@@ -221,13 +221,13 @@ Package: `com.onix322.database.repository`
 | --- | --- |
 | `Optional<T> find(ID id)` | `EntityManager.find` |
 | `List<T> findAll()` | Criteria query over the entity type |
-| `T save(T entity)` | `EntityManager.persist` (insert) |
-| `T update(T entity)` | `EntityManager.merge` (update/upsert) |
+| `T save(T entity)` | `EntityManager.merge` (insert or update) |
+| `T update(T entity)` | `EntityManager.merge` (insert or update) |
 | `void delete(T entity)` | `EntityManager.remove`, merging a detached entity first |
 | `long count()` | Criteria count query |
 | `boolean exists(ID id)` | `EntityManager.find` and null check |
 
-Each method delegates to `execute` or `executeWithResult`, so every call is its own transaction. `save` and `update` are intentionally separate: `save` inserts, `update` merges. Feature repositories extend the class, pass their entity type to the constructor, and add feature-specific queries through `ORM`.
+Each method delegates to `execute` or `executeWithResult`, so every call is its own transaction. `save` and `update` share the same semantics: both upsert through `EntityManager.merge`. Feature repositories extend the class, pass their entity type to the constructor, and add feature-specific queries through `ORM`.
 
 `BaseRepository` receives `ORM` through field injection into a `protected` non-final field. Subclasses therefore only pass the entity type:
 
