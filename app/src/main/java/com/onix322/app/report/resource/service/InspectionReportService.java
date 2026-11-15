@@ -5,6 +5,7 @@ import com.onix322.app.report.resource.model.impl.InspectionReport;
 import com.onix322.app.report.resource.repository.ReportRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -29,12 +30,16 @@ public class InspectionReportService {
 
     public Boolean delete(UUID id) {
         Optional<InspectionReport> report = reportRepository.find(id);
-        report.ifPresent(value -> reportRepository.delete(value));
-        return reportRepository.exists(id);
+        if(report.isPresent()){
+            reportRepository.delete(report.get());
+            return true;
+        }
+        return false;
     }
 
-    public Optional<InspectionReport> getById(UUID id) {
-        return reportRepository.find(id);
+    public InspectionReport getById(UUID id) {
+        Optional<InspectionReport> report = reportRepository.find(id);
+        return report.orElseThrow(() -> new NotFoundException("Report not found"));
     }
 
     public InspectionReport update(UUID id, InspectionReport report) {

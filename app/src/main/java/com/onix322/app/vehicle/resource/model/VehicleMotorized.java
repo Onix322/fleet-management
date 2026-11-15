@@ -4,6 +4,7 @@ import com.onix322.app.vehicle.util.OwnershipType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.sql.Date;
 
@@ -11,6 +12,7 @@ import java.sql.Date;
 @Entity
 @Data
 @DiscriminatorValue("motorized")
+@ToString(callSuper = true)
 public class VehicleMotorized  extends VehicleAbstract {
 
     @Column(name = "last_pti")

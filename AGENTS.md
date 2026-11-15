@@ -44,7 +44,7 @@ the conventions the codebase and documentation must follow.
   annotations are replaced with their `jakarta.inject.*` equivalents.
   Guice 7 recognizes `jakarta.inject.Inject`, `jakarta.inject.Singleton`,
   and `jakarta.inject.Named`.
-- JAX-RS resources (e.g. `VanResource`) must use `jakarta.inject.Inject`
+- JAX-RS resources (e.g. `VanController`) must use `jakarta.inject.Inject`
   in the constructor. They are created by Jersey / HK2, not Guice, and must
   not be bound in Guice modules.
 - Concrete `@Singleton` classes with injectable constructors use Guice JIT
