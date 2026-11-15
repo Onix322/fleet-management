@@ -48,7 +48,7 @@ the conventions the codebase and documentation must follow.
   annotations are replaced with their `jakarta.inject.*` equivalents.
   Guice 7 recognizes `jakarta.inject.Inject`, `jakarta.inject.Singleton`,
   and `jakarta.inject.Named`.
-- JAX-RS resources (e.g. `VanResource`) must use `jakarta.inject.Inject`
+- JAX-RS resources (e.g. `VanController`) must use `jakarta.inject.Inject`
   in the constructor. They are created by Jersey / HK2, not Guice, and must
   not be bound in Guice modules.
 - Concrete `@Singleton` classes with injectable constructors use Guice JIT
@@ -76,7 +76,8 @@ the conventions the codebase and documentation must follow.
   runtime verification.
 - The running application listens on `localhost:8080`; PostgreSQL is on
   `5432`. After code changes the running process must be rebuilt and
-  restarted; the stale process will not reflect new annotations or bindings.
+  restarted (by the user, per the approval rule above); the stale process
+  will not reflect new annotations or bindings.
 - After rebuilding, verify:
   ```sh
   curl -i -X POST 'http://localhost:8080/create' \

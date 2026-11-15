@@ -30,5 +30,4 @@
             <artifactId>config</artifactId>
         </dependency>
     </dependencies>
-
 </project>

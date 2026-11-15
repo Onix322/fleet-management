@@ -1,44 +1,61 @@
 package com.onix322.app.vehicle.resource.model;
 
-import com.onix322.app.image.resource.model.ImageDamage;
-import com.onix322.app.image.resource.model.ImageProfile;
-import com.onix322.app.vehicle.util.OwnershipType;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.onix322.app.details.resource.model.imp.VehicleDetails;
+import com.onix322.app.image.resource.model.impl.ImageProfile;
+import com.onix322.app.report.resource.model.impl.DamageReport;
+import com.onix322.app.report.resource.model.impl.InspectionReport;
+import com.onix322.app.vehicle.resource.model.impl.Van;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Data
 @Table(name = "vehicle")
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @DiscriminatorColumn(name = "vehicle_type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "vehicle_type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Van.class, name = "van"),
+})
 public abstract class VehicleAbstract implements Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "brand", nullable = false)
-    private String brand;
+    @OneToOne(
+            mappedBy = "vehicle",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            optional = false
+    )
+    private VehicleDetails details;
 
-    @Column(name = "model")
-    private String model;
+    @OneToMany(
+            mappedBy = "vehicle",
+            fetch = FetchType.EAGER,
+            orphanRemoval = true,
+            cascade = CascadeType.ALL
+    )
+    private List<ImageProfile> images;
 
-    @Column(name = "construction_year")
-    private Date constructionYear;
+    @OneToMany(
+            mappedBy = "vehicle",
+            orphanRemoval = true,
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER
+    )
+    private List<InspectionReport> inspectionReports;
 
-    @Column(name = "ownership_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private OwnershipType ownType;
-
-    @Column(name = "registration_date")
-    private Date registrationDate;
-
-    @OneToMany
-    private List<ImageProfile> imageProfileList;
-
-    @OneToMany
-    private List<ImageDamage> imageDamageList;
+    @OneToMany(
+            mappedBy = "vehicle",
+            orphanRemoval = true,
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER
+    )
+    private List<DamageReport> damageReports;
 }
