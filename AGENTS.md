@@ -5,9 +5,7 @@ source of truth for what may and may not be done without approval, and for
 the conventions the codebase and documentation must follow.
 
 ## Approval-required actions
-- **AGENTS.md (highest priority)**: this file is the most important file
-  in the repository. It must NOT be modified, deleted, or renamed without
-  my explicit prior approval of the exact change (diff shown first).
+- **AGENTS.md (highest priority)**: This is the most important file in the repository. It can ONLY be modified, deleted, or renamed with my explicit prior approval. When I say "yes, you can modify AGENTS.md", you must first show me the exact diff of changes before applying them.
 - **Code**: before applying ANY code change — creating, editing, or
   deleting any code file — you must first present the exact diff
   (before → after) and wait for my explicit approval. Nothing is
@@ -20,8 +18,8 @@ the conventions the codebase and documentation must follow.
   `restore`, `rm`, `mv`, `stash`, `cherry-pick` — must be presented with its
   exact command and explicitly approved before it is run. Read-only git
   commands (`status`, `log`, `diff`, `branch -v`, ...) are exempt.
-- Do not run destructive shell commands that bypass the diff-approval rule.
-
+- Do not run destructive shell commands that bypass the diff-approval rule (e.g., `rm -rf`, `git reset --hard`, `mvn clean` on a shared build).
+- User interactions without a graphical interface shall use text-based approaches; all user rules and permissions are binding.
 ## Scope exclusion
 - The `null/` directory is completely out of scope. Never read, modify,
   or delete anything inside it.
@@ -70,6 +68,7 @@ the conventions the codebase and documentation must follow.
   the `Database` and `ORM` contracts.
 - The source of truth for configuration values is
   `config/src/main/resources/application.properties`.
+- `hibernate.hbm2ddl.auto=create-drop` is development-only; production requires manual schema migration via Flyway or Liquibase.
 
 ## Build & runtime
 - `mvn -o compile` is the offline build check. It must pass before any
@@ -78,9 +77,6 @@ the conventions the codebase and documentation must follow.
   `5432`. After code changes the running process must be rebuilt and
   restarted (by the user, per the approval rule above); the stale process
   will not reflect new annotations or bindings.
-- After rebuilding, verify:
-  ```sh
-  curl -i -X POST 'http://localhost:8080/create' \
-    -H 'Content-Type: application/json' \
-    -d '{"id":"6f1c0d2e-9b3a-4f7c-8d21-2a4b6c8d0e1f"}'
-  ```
+
+## Security & authorization
+- No auth/authorization implemented; add via a dedicated security module before open-sourcing.
