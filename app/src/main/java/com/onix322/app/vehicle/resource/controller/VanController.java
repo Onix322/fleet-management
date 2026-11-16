@@ -2,6 +2,7 @@ package com.onix322.app.vehicle.resource.controller;
 
 import com.onix322.app.vehicle.resource.model.impl.Van;
 import com.onix322.app.vehicle.resource.service.VanService;
+import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Singleton
 public class VanController {
 
-    private VanService vanService;
+    private VehicleService<Van> vanService;
 
     @POST
     @Path("/create")

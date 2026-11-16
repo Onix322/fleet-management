@@ -3,6 +3,7 @@ package com.onix322.app.integration.controller;
 import com.onix322.app.vehicle.resource.controller.VanController;
 import com.onix322.app.vehicle.resource.model.impl.Van;
 import com.onix322.app.vehicle.resource.service.VanService;
+import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class VanControllerTest {
 
     @Mock
-    private VanService vanService;
+    private VehicleService<Van> vanService;
 
     private VanController vanController;
 
