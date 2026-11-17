@@ -21,7 +21,10 @@ public class VanService {
     @Transactional
     public Van create(Van van) {
         if(van.getDetails() == null || van.getImages().isEmpty()) {
-            throw new IllegalArgumentException("Vehicle details or profile images cannot be null / empty");
+            String message = "";
+            if(van.getDetails() == null) message = "Vehicle details is null";
+            if(van.getImages().isEmpty()) message = "Vehicle profile images is empty";
+            throw new IllegalArgumentException(message);
         }
         van.getDetails().setVehicle(van);
         van.getImages().forEach(image -> image.setVehicle(van));
