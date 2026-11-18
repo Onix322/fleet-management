@@ -18,7 +18,7 @@ public class InspectionReportService {
     private ReportRepository reportRepository;
 
     public InspectionReport create(InspectionReport report) {
-        if (report.getVehicle().getId() == null || report.getDetails() == null){
+        if (report.getVehicle().getId() == null || report.getDetails() == null) {
             throw new IllegalArgumentException("Vehicle id and details are required");
         }
         return reportRepository.save(report);
@@ -29,12 +29,8 @@ public class InspectionReportService {
     }
 
     public Boolean delete(UUID id) {
-        Optional<InspectionReport> report = reportRepository.find(id);
-        if(report.isPresent()){
-            reportRepository.delete(report.get());
-            return true;
-        }
-        return false;
+
+        return reportRepository.delete(id);
     }
 
     public InspectionReport getById(UUID id) {

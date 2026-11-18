@@ -36,12 +36,7 @@ public class VanService {
     }
 
     public Boolean delete(UUID id) {
-        Optional<Van> van = vanRepository.find(id);
-        if(van.isPresent()) {
-            vanRepository.delete(van.get());
-            return true;
-        }
-        return false;
+        return vanRepository.delete(id);
     }
 
     public Van getById(UUID id) {

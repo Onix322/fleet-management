@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.Root;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Generic persistence operations built on top of the {@link ORM} transaction boundary.
@@ -52,8 +53,17 @@ public abstract class BaseRepository<T, ID> {
         return orm.executeWithResult(em -> em.merge(entity));
     }
 
-    public void delete(T entity) {
-        orm.execute(em -> em.remove(em.contains(entity) ? entity : em.merge(entity)));
+    public Boolean delete(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Van id cannot be null");
+        }
+        return orm.executeWithResult(em -> {
+            T entity = em.find(type, id);
+            if (entity == null) return false;
+
+            em.remove(entity);
+            return true;
+        });
     }
 
     public long count() {

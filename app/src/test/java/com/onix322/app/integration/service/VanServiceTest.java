@@ -132,4 +132,67 @@ public class VanServiceTest {
                 Arguments.arguments(new NotFoundException("Vehicle not found")) // testing failure scenario
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("provideUpdateMethodArguments")
+    public void testUpdateMethod(Throwable throwable) {
+
+        // GIVEN
+        Van givenVan = new Van();
+        Van expected = new Van();
+
+        UUID givenId = UUID.randomUUID();
+
+        // WHEN
+        if (throwable != null) {
+            when(vanRepository.update(givenVan)).thenThrow(throwable);
+
+            //THEN
+            assertThrows(throwable.getClass(), () -> vanService.update(givenId, givenVan));
+            return;
+        }
+
+        // WHEN
+        givenVan.setId(givenId);
+        when(vanRepository.update(givenVan)).thenReturn(expected);
+
+        // THEN
+        assertEquals(expected, vanService.update(givenId, givenVan));
+        verify(vanRepository).update(givenVan);
+    }
+
+    static Stream<Arguments> provideUpdateMethodArguments() {
+        return Stream.of(
+                Arguments.arguments((Exception) null),
+                Arguments.arguments(new RuntimeException("Internal server error"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideDeleteMethodArguments")
+    public void testDeleteMethod(UUID givenId, Boolean expected, Throwable throwable) {
+
+        // WHEN
+        if (throwable != null) {
+            when(vanRepository.delete(givenId)).thenThrow(throwable);
+            assertThrows(throwable.getClass(), () -> vanService.delete(givenId));
+            return;
+        }
+
+        when(vanRepository.delete(givenId)).thenReturn(expected);
+        assertEquals(expected, vanService.delete(givenId));
+
+        verify(vanRepository).delete(givenId);
+        // THEN
+    }
+
+    static Stream<Arguments> provideDeleteMethodArguments() {
+        return Stream.of(
+                Arguments.arguments(UUID.randomUUID(), Boolean.TRUE, (Exception) null),
+                Arguments.arguments(UUID.randomUUID(), Boolean.FALSE, (Exception) null),
+                Arguments.arguments(null, null, new IllegalArgumentException("Van id cannot be null")),
+                Arguments.arguments(null, null, new RuntimeException("Internal server error"))
+        );
+    }
 }
+
