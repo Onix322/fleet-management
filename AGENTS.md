@@ -42,32 +42,40 @@ These rules are the source of truth for every session on this repository.
 
 ## Documentation
 
-- Write all docs in **English** (`README.md` and `docs/`).
-- Do not include file-by-file trees, current-domain catalogues (use generic `Example` placeholders), or "Known Issues" /
-  "Limitations" sections.
-- `docs/FRAMEWORK.md`: stable framework (`config`, `database`, `server`, `context`).
-- `docs/APPLICATION.md`: volatile application layer (generic feature implementation model).
-- `docs/API.md`: generic HTTP / API conventions.
-- `docs/CONFIGURATION.md`: property ownership, defaults, replacement steps; separate general (`server.*`,
-  `database.url|user|password`) from `hibernate.*`.
-- `docs/DEVELOPMENT.md`: build, run, DB setup, IDE, conventions, testing.
-
-## Code Conventions
-
-- Use **Jakarta** annotations (`jakarta.inject.Inject`, `@Singleton`, `@Named`), never `com.google.inject.*`.
-- JAX-RS resources (e.g., `VanController`) use constructor `@Inject`, are instantiated by Jersey/HK2, and **must not**
-  be bound in Guice modules.
-- Concrete `@Singleton` classes with injectable constructors use Guice JIT bindings; add explicit bindings only for
-  interfaces, qualifiers, providers, or specific implementations.
-- Repositories extend `BaseRepository<T, ID>` (`com.onix322.database.repository`), passing `Class<T>` to `super(type)`
-  and using inherited `@Inject protected ORM orm;`. Direct `ORM` usage can coexist when finer control is needed.
-- `Van` inherits `UUID id` without `@GeneratedValue`; JSON payloads for `Van` endpoints must supply an explicit `UUID`.
+## Code conventions
+- Java annotations use the **Jakarta** namespace. All `com.google.inject.*`
+  annotations are replaced with their `jakarta.inject.*` equivalents.
+  Guice 7 recognizes `jakarta.inject.Inject`, `jakarta.inject.Singleton`,
+  and `jakarta.inject.Named`.
+- JAX-RS resources (e.g. `VanController`) must use `jakarta.inject.Inject`
+  in the constructor. They are created by Jersey / HK2, not Guice, and must
+  not be bound in Guice modules.
+- Concrete `@Singleton` classes with injectable constructors use Guice JIT
+  bindings. Explicit bindings are only needed for interfaces, qualifiers,
+  providers, and implementation choices.
+- `BaseRepository<T, ID>` lives in `com.onix322.database.repository`
+  (framework `database` module) and is the recommended default for
+  application repositories. It uses field injection
+  (`@Inject protected ORM orm;`) and a constructor
+  `BaseRepository(Class<T> type)`. Subclasses only pass the entity type.
+  For more control, use the `ORM` contract directly. Both can coexist in
+  the same repository.
+- `Van` currently has only the inherited `UUID id` (no `@GeneratedValue`).
+  JSON payloads for `Van` endpoints must include an explicit UUID.
+- JAX-RS resources must not be bound in Guice modules.
 
 ## Persistence, Build & Runtime
 
-- Defaults: PostgreSQL (`localhost:5432`) + Hibernate; replaceable via `Database` and `ORM` contracts.
-- Config source of truth: `config/src/main/resources/application.properties`.
-- `hibernate.hbm2ddl.auto=create-drop` is dev-only; production requires Flyway or Liquibase migrations.
-- Run `mvn -o compile` for offline build verification before runtime checks.
-- App runs on `localhost:8080`. User handles rebuild/restart after approved changes.
-- **Security:** No auth implemented yet; add via a dedicated security module before open-sourcing.
+## Build & runtime
+- `mvn -o compile` is the offline build check. It must pass before any
+  runtime verification.
+- The running application listens on `localhost:8080`; PostgreSQL is on
+  `5432`. After code changes the running process must be rebuilt and
+  restarted (by the user, per the approval rule above); the stale process
+  will not reflect new annotations or bindings.
+- After rebuilding, verify:
+  ```sh
+  curl -i -X POST 'http://localhost:8080/create' \
+    -H 'Content-Type: application/json' \
+    -d '{"id":"6f1c0d2e-9b3a-4f7c-8d21-2a4b6c8d0e1f"}'
+  ```
