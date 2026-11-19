@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +33,9 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public Optional<T> find(ID id) {
+        if(id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
         return orm.executeWithResult(em -> Optional.ofNullable(em.find(type, id)));
     }
 
@@ -46,16 +50,24 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public T save(T entity) {
+        if(entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
         return orm.executeWithResult(em -> em.merge(entity));
     }
 
+    @Deprecated(forRemoval = true)
     public T update(T entity) {
+        if(entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
+
         return orm.executeWithResult(em -> em.merge(entity));
     }
 
-    public Boolean delete(UUID id) {
+    public Boolean delete(ID id) {
         if (id == null) {
-            throw new IllegalArgumentException("Van id cannot be null");
+            throw new IllegalArgumentException("Id cannot be null");
         }
         return orm.executeWithResult(em -> {
             T entity = em.find(type, id);
@@ -77,6 +89,9 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public boolean exists(ID id) {
+        if(id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
         return orm.executeWithResult(em -> em.find(type, id) != null);
     }
 }
