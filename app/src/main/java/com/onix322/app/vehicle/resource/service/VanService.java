@@ -10,7 +10,6 @@ import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +21,10 @@ public class VanService {
     @Transactional
     public Van create(Van van) {
         if(van.getDetails() == null || van.getImages().isEmpty()) {
-            throw new IllegalArgumentException("Vehicle details or profile images cannot be null / empty");
+            String message = "";
+            if(van.getDetails() == null) message = "Vehicle details is null";
+            if(van.getImages().isEmpty()) message = "Vehicle profile images is empty";
+            throw new IllegalArgumentException(message);
         }
         van.getDetails().setVehicle(van);
         van.getImages().forEach(image -> image.setVehicle(van));
@@ -34,12 +36,7 @@ public class VanService {
     }
 
     public Boolean delete(UUID id) {
-        Optional<Van> van = vanRepository.find(id);
-        if(van.isPresent()) {
-            vanRepository.delete(van.get());
-            return true;
-        }
-        return false;
+        return vanRepository.delete(id);
     }
 
     public Van getById(UUID id) {

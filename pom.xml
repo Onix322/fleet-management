@@ -32,6 +32,7 @@
         <logback.version>1.5.12</logback.version>
         <lombok.version>1.18.36</lombok.version>
         <junit.version>5.11.3</junit.version>
+        <mockito.version>5.20.0</mockito.version>
         <jersey.version>3.1.9</jersey.version>
     </properties>
 
@@ -167,6 +168,22 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito (Testing) -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito + JUnit 5 integration -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -64,7 +64,11 @@ These rules are the source of truth for every session on this repository.
   JSON payloads for `Van` endpoints must include an explicit UUID.
 - JAX-RS resources must not be bound in Guice modules.
 
-## Persistence, Build & Runtime
+## Persistence & configuration
+- PostgreSQL and Hibernate are the defaults. They are replaceable through
+  the `Database` and `ORM` contracts.
+- The source of truth for configuration values is
+  `config/src/main/resources/application.properties`.
 
 ## Build & runtime
 - `mvn -o compile` is the offline build check. It must pass before any
@@ -73,9 +77,6 @@ These rules are the source of truth for every session on this repository.
   `5432`. After code changes the running process must be rebuilt and
   restarted (by the user, per the approval rule above); the stale process
   will not reflect new annotations or bindings.
-- After rebuilding, verify:
-  ```sh
-  curl -i -X POST 'http://localhost:8080/create' \
-    -H 'Content-Type: application/json' \
-    -d '{"id":"6f1c0d2e-9b3a-4f7c-8d21-2a4b6c8d0e1f"}'
-  ```
+
+## Security & authorization
+- No auth/authorization implemented; add via a dedicated security module before open-sourcing.
