@@ -71,6 +71,8 @@ These rules are the source of truth for every session on this repository.
   `config/src/main/resources/application.properties`.
 
 ## Build & runtime
+- The code and the build target **Java 21** (`maven.compiler.source/target`
+  and `maven.compiler.release` in the root `pom.xml`). Use a JDK 21 toolchain.
 - `mvn -o compile` is the offline build check. It must pass before any
   runtime verification.
 - The running application listens on `localhost:8080`; PostgreSQL is on
