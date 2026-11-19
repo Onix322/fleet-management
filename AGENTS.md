@@ -1,47 +1,46 @@
 # Agent Rules for Fleet Management
 
-These rules apply to every session working on this project. They are the
-source of truth for what may and may not be done without approval, and for
-the conventions the codebase and documentation must follow.
+These rules are the source of truth for every session on this repository.
 
-## Approval-required actions
-- **AGENTS.md (highest priority)**: this file is the most important file
-  in the repository. It must NOT be modified, deleted, or renamed without
-  my explicit prior approval of the exact change (diff shown first).
-- **Code**: before applying ANY code change — creating, editing, or
-  deleting any code file — you must first present the exact diff
-  (before → after) and wait for my explicit approval. Nothing is
-  applied without it.
-- **Documentation**: when a code change affects documentation, propose the
-  documentation updates alongside the code diff and get the same approval.
-- **Git**: ANY git command that creates, updates, edits, modifies, or deletes
-  repository state — e.g. `commit`, `push`, `branch` (create/rename/delete),
-  `tag` (create/delete), `merge`, `rebase`, `reset`, `amend`, `checkout`,
-  `restore`, `rm`, `mv`, `stash`, `cherry-pick` — must be presented with its
-  exact command and explicitly approved before it is run. Read-only git
-  commands (`status`, `log`, `diff`, `branch -v`, ...) are exempt.
-- Do not run destructive shell commands that bypass the diff-approval rule.
+## Token Efficiency & Workflow
 
-## Scope exclusion
-- The `null/` directory is completely out of scope. Never read, modify,
-  or delete anything inside it.
+- **Be concise:** Skip greetings, filler, and summaries. Output only requested code, diffs, or direct technical answers.
+- **Minimal context:** Read only exact files and line ranges needed. Never dump entire directories unless instructed.
+- **Surgical edits:** Modify only target functions/blocks; never rewrite entire files or reformat unrelated code.
+- **Plan first:** If a change spans >2 files, propose a brief bulleted plan before generating diffs.
+- **No build loops:** If `mvn -o compile` fails twice on the same error, stop and ask instead of retrying.
+
+## Approval-Required Actions
+
+- **AGENTS.md (highest priority):** Never modify, delete, or rename without explicit prior approval. When approved (
+  "yes, you can modify AGENTS.md"), show the exact diff first and wait for confirmation.
+- **Code & Docs:** Before creating, editing, or deleting ANY file, present the exact diff (`before → after`) and wait
+  for explicit approval. Include affected `docs/` updates in the same diff review.
+- **Git:** Present the exact command and wait for approval before running any state-changing git command (`commit`,
+  `push`, `branch`, `tag`, `merge`, `rebase`, `reset`, `checkout`, `restore`, `rm`, `mv`, `stash`, `cherry-pick`).
+  Read-only commands (`status`, `log`, `diff`, `branch -v`) are exempt.
+    - **Branch Naming Convention:** When creating or proposing new branches, use these standard prefixes:
+        - `feat/` (e.g., `feat/add-itp-field`, `feat/update-ownership-types`) — for new functionality or feature
+          extensions.
+        - `fix/` (e.g., `fix/uuid-parsing-error`) — for bug fixes and correcting issues in existing code.
+        - `chore/` (e.g., `chore/update-enums`, `chore/minor-updates`) — for maintenance, config tweaks, or minor
+          housekeeping.
+        - `refactor/` (e.g., `refactor/ownership-type`) — for code restructuring or improvements without behavior
+          changes.
+        - `update/` or `enhancement/` (e.g., `update/vehicle-model`, `enhancement/add-pti-date`) — for descriptive
+          extensions of existing features.
+        - `docs/` (e.g., `docs/api-documentation`) — for modifications restricted strictly to documentation.
+        - `test/` (e.g., `test/add-repository-integration-tests`) — for adding or updating unit/integration tests.
+
+
+- **Shell safety:** Never run destructive commands (`rm -rf`, `git reset --hard`, `mvn clean` on shared builds). Use
+  text-based interactions only.
+
+## Scope Exclusion
+
+- Never read, modify, or delete anything inside `null/`.
 
 ## Documentation
-- All documentation is written in **English**, in `README.md` and `docs/`.
-- No file-by-file project tree and no current-domain catalogues in general
-  docs. Use generic `Example` placeholders instead.
-- No "Known Issues" or "Limitations" sections.
-- `docs/FRAMEWORK.md` documents the stable framework (`config`, `database`,
-  `server`, `context`).
-- `docs/APPLICATION.md` documents the volatile application layer and serves
-  as a generic feature implementation model.
-- `docs/API.md` documents generic HTTP / API conventions.
-- `docs/CONFIGURATION.md` documents property ownership, default
-  implementations, and replacement steps. It must distinguish general
-  properties (`server.*`, `database.url|user|password`) from
-  Hibernate-specific ones (`hibernate.*`).
-- `docs/DEVELOPMENT.md` documents build, run, database setup, IDE,
-  conventions, and testing.
 
 ## Code conventions
 - Java annotations use the **Jakarta** namespace. All `com.google.inject.*`
@@ -65,11 +64,7 @@ the conventions the codebase and documentation must follow.
   JSON payloads for `Van` endpoints must include an explicit UUID.
 - JAX-RS resources must not be bound in Guice modules.
 
-## Persistence & configuration
-- PostgreSQL and Hibernate are the defaults. They are replaceable through
-  the `Database` and `ORM` contracts.
-- The source of truth for configuration values is
-  `config/src/main/resources/application.properties`.
+## Persistence, Build & Runtime
 
 ## Build & runtime
 - `mvn -o compile` is the offline build check. It must pass before any
