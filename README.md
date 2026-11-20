@@ -18,7 +18,7 @@
 
 Backend application for fleet management, written in Java 21 and organized as a Maven multi-module project.
 
-The application runs on an embedded Apache Tomcat server, exposes a JAX-RS (Jersey) REST layer, uses Google Guice for dependency injection, and persists data with Hibernate / JPA on PostgreSQL. PostgreSQL and Hibernate are the **default implementations** of the `Database` and `ORM` contracts; both can be replaced by binding the same contracts to different implementations.
+The application runs on an embedded Apache Tomcat server, exposes a JAX-RS (Jersey) REST layer, uses Google Guice for dependency injection, and persists data with Hibernate / JPA on PostgreSQL. PostgreSQL and Hibernate are the **default implementations** of the `Database` and `ORM` contracts; both can be replaced by binding the same contracts to different implementations. Each HTTP request keeps one persistence session open until the response is serialized, so lazy associations load on demand.
 
 ## Overview
 

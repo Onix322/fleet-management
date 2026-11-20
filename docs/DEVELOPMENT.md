@@ -106,7 +106,7 @@ Startup performs the following work before accepting traffic:
 2. creates the PostgreSQL data source;
 3. builds the Hibernate `SessionFactory` and registers the entities from the Guice multibinder;
 4. creates the Tomcat server;
-5. configures the Jersey servlet;
+5. configures the Jersey servlet and registers the filters from the `Set<Filter>` multibinder;
 6. starts the connector and blocks on `tomcat.getServer().await()`.
 
 If the database is unreachable or the configuration is invalid, startup fails while the injector creates the eager singletons. See [FRAMEWORK.md](FRAMEWORK.md) for the full sequence.
@@ -265,7 +265,8 @@ Typical workflow:
 4. add repositories under `resource/repository`, extending `BaseRepository` for standard CRUD;
 5. add REST resources under `resource/controller`;
 6. rely on the framework contracts (`Configuration`, `Database`, `ORM`) and `BaseRepository` instead of implementation classes;
-7. update [API.md](API.md) when endpoints change.
+7. keep associations `LAZY`; the request-scoped session installed by `PersistenceModule` makes them load during serialization;
+8. update [API.md](API.md) when endpoints change.
 
 ---
 
