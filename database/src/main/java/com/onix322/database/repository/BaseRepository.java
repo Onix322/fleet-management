@@ -5,11 +5,10 @@ import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import lombok.Getter;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Generic persistence operations built on top of the {@link ORM} transaction boundary.
@@ -22,10 +21,11 @@ import java.util.UUID;
  * @param <ID> identifier type
  */
 
-public abstract class BaseRepository<T, ID> {
+public class BaseRepository<T, ID> {
 
     @Inject
     protected ORM orm;
+    @Getter
     private final Class<T> type;
 
     protected BaseRepository(Class<T> type) {
@@ -33,7 +33,7 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public Optional<T> find(ID id) {
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");
         }
         return orm.executeWithResult(em -> Optional.ofNullable(em.find(type, id)));
@@ -50,18 +50,9 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public T save(T entity) {
-        if(entity == null) {
+        if (entity == null) {
             throw new IllegalArgumentException("Entity cannot be null");
         }
-        return orm.executeWithResult(em -> em.merge(entity));
-    }
-
-    @Deprecated(forRemoval = true)
-    public T update(T entity) {
-        if(entity == null) {
-            throw new IllegalArgumentException("Entity cannot be null");
-        }
-
         return orm.executeWithResult(em -> em.merge(entity));
     }
 
@@ -89,7 +80,7 @@ public abstract class BaseRepository<T, ID> {
     }
 
     public boolean exists(ID id) {
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");
         }
         return orm.executeWithResult(em -> em.find(type, id) != null);

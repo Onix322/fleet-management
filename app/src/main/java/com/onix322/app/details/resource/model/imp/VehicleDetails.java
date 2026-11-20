@@ -34,7 +34,7 @@ public class VehicleDetails extends DetailsAbstract {
     @Column(name = "registration_date")
     private Date registrationDate;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id", nullable = false)
     @JsonIgnoreProperties("details")
     private VehicleAbstract vehicle;

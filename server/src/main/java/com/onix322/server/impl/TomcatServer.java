@@ -6,15 +6,19 @@ import com.onix322.server.Server;
 import com.onix322.server.config.GuiceHK2Bridge;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.servlet.Filter;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import java.io.File;
+import java.util.Set;
 
 @Singleton
 @AllArgsConstructor(onConstructor_ = @Inject)
@@ -23,6 +27,7 @@ public class TomcatServer implements Server {
     private final Tomcat tomcat;
     private final Configuration configuration;
     private final Injector injector;
+    private final Set<Filter> filters;
 
     @Override
     public void start() {
@@ -77,6 +82,7 @@ public class TomcatServer implements Server {
         Context context = server.addContext(contextPath, docBase);
 
         this.jerseyConfig(context);
+        this.filtersConfig(context);
 
     }
 
@@ -102,5 +108,25 @@ public class TomcatServer implements Server {
 
         // Map REST API
         context.addServletMapping(apiPath, "jersey");
+    }
+
+    /**
+     * Registers the Guice-provided servlet filters on the context. Filters run around the
+     * Jersey servlet, so they cover the whole request including entity serialization.
+     */
+    private void filtersConfig(Context context) {
+        filters.forEach(filter -> {
+            String name = filter.getClass().getName();
+
+            FilterDef definition = new FilterDef();
+            definition.setFilterName(name);
+            definition.setFilter(filter);
+            context.addFilterDef(definition);
+
+            FilterMap mapping = new FilterMap();
+            mapping.setFilterName(name);
+            mapping.addURLPattern("/*");
+            context.addFilterMap(mapping);
+        });
     }
 }

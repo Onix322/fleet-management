@@ -1,7 +1,7 @@
 package com.onix322.app.report.resource.controller;
 
 import com.onix322.app.report.resource.model.impl.InspectionReport;
-import com.onix322.app.report.resource.service.InspectionReportService;
+import com.onix322.app.report.resource.service.ReportService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
@@ -14,9 +14,9 @@ import java.util.UUID;
 @Path("/report")
 @AllArgsConstructor(onConstructor_ = @Inject)
 @Singleton
-public class ReportController {
+public class InspectionReportController {
 
-    private InspectionReportService inspectionReportService;
+    private ReportService<InspectionReport> inspectionReportService;
 
     @POST
     @Path("/create")

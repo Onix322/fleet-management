@@ -33,7 +33,7 @@ public class ReportDetails extends DetailsAbstract {
     @Column(name = "type")
     private String type;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "report_id", referencedColumnName = "id")
     @JsonIgnore
     private ReportAbstract report;
