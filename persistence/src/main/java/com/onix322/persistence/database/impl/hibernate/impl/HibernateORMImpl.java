@@ -73,17 +73,15 @@ public class HibernateORMImpl implements HibernateORM {
     @Override
     public void end() {
         Session session = scopedSession.get();
-        if (session == null) {
-            return;
-        }
-        scopedSession.remove();
-        try {
+        try (session) {
+            if (session == null) {
+                return;
+            }
+            scopedSession.remove();
             Transaction transaction = session.getTransaction();
             if (transaction.isActive()) {
                 transaction.rollback();
             }
-        } finally {
-            session.close();
         }
     }
 

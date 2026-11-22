@@ -1,15 +1,11 @@
-package com.onix322.app.persistence;
+package com.onix322.persistence.filter;
 
 import com.onix322.persistence.database.ORM;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-
 import java.io.IOException;
+
+import jakarta.servlet.*;
 
 /**
  * Keeps one persistence session bound to the request thread for the whole HTTP request.

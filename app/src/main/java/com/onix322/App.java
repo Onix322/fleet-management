@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.onix322.app.damage.guice.DamageModule;
 import com.onix322.app.details.guice.DetailsModule;
 import com.onix322.app.image.guice.ImageModule;
-import com.onix322.app.persistence.PersistenceModule;
+import com.onix322.persistence.guice.PersistenceModule;
 import com.onix322.app.report.guice.ReportModule;
 import com.onix322.context.ApplicationContext;
 import com.onix322.server.Server;
