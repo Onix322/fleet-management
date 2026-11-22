@@ -22,11 +22,12 @@ The application runs on an embedded Apache Tomcat server, exposes a JAX-RS (Jers
 
 ## Overview
 
-Fleet Management is split into two layers:
+Fleet Management is split into a framework layer, a support module, and an application layer:
 
 | Layer | Modules | Change profile |
 | --- | --- | --- |
-| Framework | `config`, `database`, `server`, `context` | Stable technical infrastructure and contracts |
+| Framework | `config`, `persistence`, `server`, `launcher` | Stable technical infrastructure and contracts |
+| Support | `initializer` | Generic repository/entity registration used by application feature modules |
 | Application | `app` | Fleet-management features, REST resources, and entities; evolves frequently |
 
 The framework provides configuration, persistence, and HTTP hosting behind contracts. It ships with **PostgreSQL** and **Hibernate** as the default `Database` and `ORM` implementations; the application composes those contracts into fleet-management features.
@@ -52,7 +53,7 @@ Detailed application documentation: [docs/APPLICATION.md](docs/APPLICATION.md).
 | Jackson | JSON serialization |
 | SLF4J + Logback | Logging |
 | Lombok | Boilerplate reduction |
-| JUnit Jupiter | Testing |
+| JUnit Jupiter + Mockito | Testing |
 
 PostgreSQL and Hibernate are defaults, not hard-coded dependencies. Exact versions are declared in the parent [`pom.xml`](pom.xml).
 
@@ -64,30 +65,41 @@ PostgreSQL and Hibernate are defaults, not hard-coded dependencies. Exact versio
 graph TD
     subgraph Framework["Framework layer"]
         Config[config]
-        Database[database]
+        Persistence[persistence]
         Server[server]
-        Context[context]
+        Launcher[launcher]
     end
 
-    App[app<br/>application layer] --> Context
-    App --> Database
+    subgraph Support["Support"]
+        Initializer[initializer]
+    end
+
+    App[app<br/>application layer]
+
+    Launcher --> App
+    Launcher --> Server
+    Launcher --> Persistence
+    Launcher --> Initializer
+    Launcher --> Config
+
+    App --> Persistence
     App --> Server
+    App --> Initializer
     App --> Config
 
-    Context --> Database
-    Context --> Server
-    Context --> Config
+    Initializer --> Persistence
+    Persistence --> Config
     Server --> Config
-    Database --> Config
 ```
 
 | Module | Layer | Responsibility |
 | --- | --- | --- |
 | `config` | Framework | `Configuration` contract; loads and typed-reads `application.properties` |
-| `database` | Framework | `Database` and `ORM` contracts, `BaseRepository`, PostgreSQL and Hibernate implementations |
-| `server` | Framework | `Server` contract; embedded Tomcat, Jersey servlet, Guice/HK2 bridge |
-| `context` | Framework | `ApplicationContext`, the composition root for framework modules |
-| `app` | Application | Entry point, feature modules, JAX-RS resources, domain model, JPA entities |
+| `persistence` | Framework | `Database` and `ORM` contracts, `BaseRepository`, PostgreSQL/Hibernate implementations, request-scoped session filter |
+| `server` | Framework | `Server` contract; embedded Tomcat, Jersey servlet, Guice/HK2 bridges |
+| `launcher` | Framework | `LauncherModule`, the composition root, and the application entry point |
+| `initializer` | Support | `InitializerModule` and `TypeFactory` for generic repositories and entity registration |
+| `app` | Application | Feature modules, JAX-RS resources, domain model, JPA entities |
 
 Framework modules are documented in [docs/FRAMEWORK.md](docs/FRAMEWORK.md). The application layer is documented in [docs/APPLICATION.md](docs/APPLICATION.md).
 
@@ -110,34 +122,34 @@ The default connection settings and all runtime properties are defined in [`conf
 
 Make sure PostgreSQL is running and that the database and credentials match the configuration in `config/src/main/resources/application.properties`.
 
-See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for the property reference.
+See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for the property reference. The default schema strategy is `hibernate.hbm2ddl.auto=create-drop`, so the schema is recreated on every startup.
 
 ### 2. Build
 
 ```bash
-mvn clean package
+mvn -o package
 ```
 
-The build produces one library JAR per module under each module's `target/` directory. The application is started through the `com.onix322.App` main class.
+The build produces one library JAR per module under each module's `target/` directory.
 
 ### 3. Run
 
-The entry point is `com.onix322.App`.
+The entry point is `com.onix322.launcher.LauncherModule`.
 
-**From IntelliJ IDEA** (the verified workflow):
+**From IntelliJ IDEA:**
 
 1. Open the project as a Maven project.
 2. Make sure the project SDK is JDK 21 and annotation processing is enabled.
-3. Run the `main` method in `app/src/main/java/com/onix322/App.java`.
+3. Run the `main` method in `launcher/src/main/java/com/onix322/launcher/LauncherModule.java`.
 
 **From the command line:**
 
 ```bash
-mvn -DskipTests install
-mvn -pl app exec:java -Dexec.mainClass=com.onix322.App
+mvn -o -DskipTests install
+mvn -pl launcher exec:java -Dexec.mainClass=com.onix322.launcher.LauncherModule
 ```
 
-The second command uses the Maven Exec plugin, which Maven resolves from the configured repositories.
+The second command uses the Maven Exec plugin, which Maven resolves from the configured repositories. `LauncherModule.main` calls `Server.launch(new LauncherModule())`.
 
 ### 4. Verify
 
@@ -145,7 +157,7 @@ The second command uses the Maven Exec plugin, which Maven resolves from the con
 curl -i http://localhost:8080/
 ```
 
-See [docs/API.md](docs/API.md) for HTTP conventions and endpoint testing examples.
+A missing resource produces a `404`; the important check is that Tomcat answers. See [docs/API.md](docs/API.md) for HTTP conventions.
 
 The application listens on port `8080` by default and blocks the main thread on the Tomcat `await()` loop.
 

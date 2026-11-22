@@ -11,10 +11,11 @@
 
     <modules>
         <module>config</module>
-        <module>database</module>
+        <module>persistence</module>
         <module>server</module>
-        <module>context</module>
+        <module>launcher</module>
         <module>app</module>
+        <module>initializer</module>
     </modules>
 
     <properties>
@@ -46,7 +47,7 @@
             </dependency>
             <dependency>
                 <groupId>com.onix322</groupId>
-                <artifactId>database</artifactId>
+                <artifactId>persistence</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -56,12 +57,17 @@
             </dependency>
             <dependency>
                 <groupId>com.onix322</groupId>
-                <artifactId>context</artifactId>
+                <artifactId>launcher</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.onix322</groupId>
                 <artifactId>app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.onix322</groupId>
+                <artifactId>initializer</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

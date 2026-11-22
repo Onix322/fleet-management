@@ -1,0 +1,38 @@
+package com.onix322.persistence.filter;
+
+import com.onix322.persistence.database.ORM;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.io.IOException;
+
+import jakarta.servlet.*;
+
+/**
+ * Keeps one persistence session bound to the request thread for the whole HTTP request.
+ *
+ * <p>The session stays open while Jersey/Jackson serialize the response, so lazily loaded
+ * associations are initialized on demand instead of failing with
+ * {@code LazyInitializationException}. Transactions remain per {@code ORM} call: this filter
+ * only owns the session scope, not the transaction boundary.</p>
+ */
+@Singleton
+public class OpenSessionInViewFilter implements Filter {
+
+    private final ORM orm;
+
+    @Inject
+    public OpenSessionInViewFilter(ORM orm) {
+        this.orm = orm;
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        orm.begin();
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            orm.end();
+        }
+    }
+}

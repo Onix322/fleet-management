@@ -15,11 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>com.onix322</groupId>
-            <artifactId>context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.onix322</groupId>
-            <artifactId>database</artifactId>
+            <artifactId>persistence</artifactId>
         </dependency>
         <dependency>
             <groupId>com.onix322</groupId>
@@ -28,6 +24,10 @@
         <dependency>
             <groupId>com.onix322</groupId>
             <artifactId>config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.onix322</groupId>
+            <artifactId>initializer</artifactId>
         </dependency>
     </dependencies>
 </project>

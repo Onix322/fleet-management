@@ -1,8 +1,7 @@
 package com.onix322.app.report.resource.repository;
 
 import com.onix322.app.report.resource.model.ReportAbstract;
-import com.onix322.app.report.resource.model.impl.InspectionReport;
-import com.onix322.database.repository.BaseRepository;
+import com.onix322.persistence.repository.BaseRepository;
 import jakarta.inject.Singleton;
 
 import java.util.UUID;

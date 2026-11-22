@@ -1,12 +1,12 @@
 # Framework
 
-> **In short:** The stable technical layer of Fleet Management: configuration, database, embedded server, and composition root.
+> **In short:** The stable technical layer of Fleet Management: configuration, persistence, embedded server, generic repository support, and composition root.
 >
 > **Read this if:** you are working on infrastructure, reviewing the platform design, or replacing a technical implementation.
 >
 > **Related:** [README](../README.md) · [Application](APPLICATION.md) · [Configuration](CONFIGURATION.md) · [Development](DEVELOPMENT.md)
 
-This document covers the **framework layer**. The fleet-management business code lives in the `app` module and is documented separately in [APPLICATION.md](APPLICATION.md).
+This document covers the **framework layer** and the **support module** used by the application. The fleet-management business code lives in the `app` module and is documented separately in [APPLICATION.md](APPLICATION.md).
 
 ---
 
@@ -17,9 +17,10 @@ The framework is a set of Maven modules that provide technical capabilities to t
 | Module | Role |
 | --- | --- |
 | `config` | Loads and exposes application properties |
-| `database` | `Database` / `ORM` contracts, generic `BaseRepository`, PostgreSQL and Hibernate default implementations |
-| `server` | Embedded Tomcat, Jersey servlet, Guice/HK2 bridge |
-| `context` | Composition root for the framework modules |
+| `persistence` | `Database` / `ORM` contracts, generic `BaseRepository`, PostgreSQL and Hibernate default implementations, request-scoped session filter |
+| `server` | Embedded Tomcat, Jersey servlet, Guice/HK2 bridges |
+| `launcher` | Composition root and application entry point |
+| `initializer` | Support module for entity registration and generic repository bindings |
 
 Design principles:
 
@@ -39,51 +40,68 @@ The framework is intentionally stable. Business features, REST resources, and en
 graph TD
     subgraph Framework["Framework layer"]
         Config[config]
-        Database[database]
+        Persistence[persistence]
         Server[server]
-        Context[context]
+        Launcher[launcher]
     end
 
-    App[app<br/>application layer] --> Context
-    App --> Database
+    subgraph Support["Support"]
+        Initializer[initializer]
+    end
+
+    App[app<br/>application layer]
+
+    Launcher --> App
+    Launcher --> Server
+    Launcher --> Persistence
+    Launcher --> Initializer
+    Launcher --> Config
+
+    App --> Persistence
     App --> Server
+    App --> Initializer
     App --> Config
 
-    Context --> Database
-    Context --> Server
-    Context --> Config
+    Initializer --> Persistence
+    Persistence --> Config
     Server --> Config
-    Database --> Config
 ```
 
 | Module | Depends on | Responsibility |
 | --- | --- | --- |
 | `config` | — | Property loading and typed access |
-| `database` | `config` | PostgreSQL, Hibernate, transactions, entity registration |
-| `server` | `config` | Embedded Tomcat, Jersey, Guice/HK2 bridge |
-| `context` | `config`, `database`, `server` | Framework composition root |
-| `app` | `context`, `database`, `server`, `config` | Application layer (see [APPLICATION.md](APPLICATION.md)) |
+| `persistence` | `config` | PostgreSQL, Hibernate, transactions, entity registration, request-scoped session |
+| `server` | `config` | Embedded Tomcat, Jersey, Guice/HK2 bridges |
+| `launcher` | `config`, `persistence`, `server`, `initializer`, `app` | Application composition root and `main` |
+| `initializer` | `persistence` | Generic entity and repository registration |
+| `app` | `config`, `persistence`, `server`, `initializer` | Application layer (see [APPLICATION.md](APPLICATION.md)) |
 
 The parent POM (`com.onix322:fleet:1.0-SNAPSHOT`, packaging `pom`) declares the shared dependency versions and the Java 21 compiler configuration.
+
+`app` declares a dependency on `server` because the application model uses JAX-RS and Jackson APIs provided by the server module. `persistence` declares `tomcat-embed-core` only for the `jakarta.servlet.Filter` API used by the request-scoped session filter.
 
 ---
 
 ## 3. Contracts
 
-The framework exposes four contracts:
+The framework exposes four public contracts:
 
 | Contract | Package | Current implementation | Purpose |
 | --- | --- | --- | --- |
 | `Configuration` | `com.onix322.config` | `ConfigurationImpl` | Typed access to properties |
-| `Database` | `com.onix322.database` | `PostgresSQL` | `DataSource` |
-| `ORM` | `com.onix322.database` | `HibernateORMImpl` | Unit-of-work scoped `EntityManager` access |
+| `Database` | `com.onix322.persistence.database` | `PostgresSQLImpl` | `DataSource` |
+| `ORM` | `com.onix322.persistence.database` | `HibernateORMImpl` | Unit-of-work scoped `EntityManager` access |
 | `Server` | `com.onix322.server` | `TomcatServer` | HTTP server lifecycle |
+
+Supporting types:
+
+- `PostgresSQLDatabase extends Database` — PostgreSQL-specific view of the database contract.
+- `HibernateORM extends ORM` — Hibernate-specific view that exposes `getSession()`.
+- `LauncherModule`, `InitializerModule`, `TypeFactory`, `FilterModule`, and `OpenSessionInViewFilter`.
 
 Each contract is bound to its implementation in a Guice module. Replacing an implementation means providing a new class and changing the binding; the application layer does not need to change.
 
-The framework ships with **PostgreSQL** (`PostgresSQL`) and **Hibernate** (`HibernateORMImpl`) as the default implementations of `Database` and `ORM`. These are defaults selected through the contracts, not hard-coded dependencies. To replace them, change the bindings in `DatabaseModule`.
-
-`ConfigurationLoader`, `PropertyParser`, and `ApplicationContext` are supporting framework classes rather than public contracts.
+The framework ships with **PostgreSQL** (`PostgresSQLImpl`) and **Hibernate** (`HibernateORMImpl`) as the default implementations of `Database` and `ORM`. To replace them, change the bindings in `PostgresSQLModule` or `HibernateModule`.
 
 ---
 
@@ -93,8 +111,8 @@ Package: `com.onix322.config`
 
 ```text
 Configuration
-├── getProperty(String key, Class<T> type)
-└── getProperties(String key)
+├── <T> T getProperty(String key, Class<T> type)
+└── Properties getProperties(String key)
 
 ConfigurationImpl
 ConfigurationLoader
@@ -153,14 +171,45 @@ Full property reference: [CONFIGURATION.md](CONFIGURATION.md).
 
 ---
 
-## 5. `database` module
+## 5. `persistence` module
 
-Package: `com.onix322.database`
+Package: `com.onix322.persistence`
 
 ```text
-Database
-└── DataSource getDataSource()
+database/
+├── Database
+├── ORM
+├── guice/DatabaseModule
+├── impl/hibernate/
+│   ├── HibernateORM
+│   ├── guice/HibernateModule
+│   └── impl/
+│       ├── HibernateORMImpl
+│       └── HibernateRepository
+└── impl/postgresql/
+    ├── PostgresSQLDatabase
+    ├── guice/PostgresSQLModule
+    └── impl/PostgresSQLImpl
 
+repository/BaseRepository
+filter/OpenSessionInViewFilter
+filter/guice/FilterModule
+guice/PersistenceModule
+```
+
+### Database and PostgresSQL
+
+`PostgresSQLImpl` reads `database.url`, `database.user` and `database.password` through `Configuration`. `getDataSource()` creates a `PGSimpleDataSource` with the configured URL, user and password.
+
+These three keys are general connection properties: any `Database` implementation can read them and map them to its own driver. PostgreSQL is simply the default implementation.
+
+`Database` is a contract that exposes only the `DataSource`. `PostgresSQLDatabase` extends it for PostgreSQL-specific use, and `PostgresSQLImpl` is the current implementation. Another database can be plugged in by binding `Database` to a different implementation in `PostgresSQLModule`.
+
+### ORM and HibernateORM
+
+`ORM` is the transaction and session contract:
+
+```text
 ORM
 ├── <R> R executeWithResult(Function<EntityManager, R> action)
 ├── void execute(Consumer<EntityManager> action)
@@ -168,21 +217,9 @@ ORM
 ├── void end()
 └── void close()
 
-PostgresSQL
-HibernateORM
-BaseRepository<T, ID>
-DatabaseModule
+HibernateORM extends ORM
+└── Session getSession()
 ```
-
-### Database and PostgresSQL
-
-`PostgresSQL` reads `database.url`, `database.user` and `database.password` through `Configuration`. `getDataSource()` creates a `PGSimpleDataSource` with the configured URL, user and password.
-
-These three keys are general connection properties: any `Database` implementation can read them and map them to its own driver. PostgreSQL is simply the default implementation.
-
-`Database` is a contract that exposes only the `DataSource`. `PostgresSQL` is the current implementation, and another database can be plugged in by binding `Database` to a different implementation in `DatabaseModule`.
-
-### ORM and HibernateORM
 
 `HibernateORMImpl` is responsible for the Hibernate `SessionFactory`. It is constructed with:
 
@@ -190,7 +227,7 @@ These three keys are general connection properties: any `Database` implementatio
 - `Configuration` — provides Hibernate settings, including the dialect;
 - `Set<Class<?>> entities` — the entity classes to register.
 
-The `SessionFactory` is built in the constructor:
+The `SessionFactory` is built in the constructor through the private `init()` method:
 
 ```java
 settings.put(AvailableSettings.JAKARTA_NON_JTA_DATASOURCE, database.getDataSource());
@@ -201,8 +238,6 @@ settings.put(AvailableSettings.FORMAT_SQL, configuration.getProperty("hibernate.
 
 entities.forEach(hibernateConfig::addAnnotatedClass);
 ```
-
-`ORM` is a contract: `HibernateORMImpl` is the current implementation, and a different persistence provider can be used by binding `ORM` to another implementation in `DatabaseModule`.
 
 Transaction helpers:
 
@@ -224,46 +259,42 @@ try {
 }
 ```
 
-The scope is opened per HTTP request by the `OpenSessionInViewFilter` in the application layer (see [Request lifecycle](#9-request-lifecycle)); outside a request, such as in unit tests or background work, the short-lived behaviour applies unchanged.
+The scope is opened per HTTP request by `OpenSessionInViewFilter` in the `persistence` module (see [Request lifecycle](#10-request-lifecycle)); outside a request, such as in unit tests or background work, the short-lived behaviour applies unchanged.
 
 ### BaseRepository
 
-Package: `com.onix322.database.repository`
+Package: `com.onix322.persistence.repository`
 
 `BaseRepository<T, ID>` is a convenience class built on the `ORM` contract. It is not a contract itself; it gives feature repositories a small, reusable CRUD base without enlarging `ORM` with CRUD operations.
 
 | Method | Behavior |
 | --- | --- |
-| `Optional<T> find(ID id)` | `EntityManager.find` |
+| `Optional<T> find(ID id)` | `EntityManager.find`; rejects `null` identifiers |
 | `List<T> findAll()` | Criteria query over the entity type |
-| `T save(T entity)` | `EntityManager.merge` (insert or update) |
-| `Boolean delete(ID id)` | `EntityManager.find` then `EntityManager.remove` |
+| `T save(T entity)` | `EntityManager.merge` (insert or update); rejects `null` entities |
+| `Boolean delete(ID id)` | `EntityManager.find` then `EntityManager.remove`; returns `false` when absent |
 | `long count()` | Criteria count query |
 | `boolean exists(ID id)` | `EntityManager.find` and null check |
 
-Each method delegates to `execute` or `executeWithResult`, so every call is its own transaction. When a session scope is active (an HTTP request), all calls of the same request share one session, so entities loaded by one call stay manageable for the next ones. `save` upserts through `EntityManager.merge`. Feature repositories extend the class, pass their entity type to the constructor, and add feature-specific queries through `ORM`.
+Each method delegates to `execute` or `executeWithResult`, so every call is its own transaction. When a session scope is active (an HTTP request), all calls of the same request share one session, so entities loaded by one call stay manageable for the next ones. `save` upserts through `EntityManager.merge`.
 
-`BaseRepository` receives `ORM` through field injection into a `protected` non-final field. Subclasses therefore only pass the entity type:
+`BaseRepository` receives `ORM` through field injection into a `protected` non-final field and keeps the entity type in a final `Class<T>` field exposed through a getter. Subclasses therefore only pass the entity type:
 
 ```java
 import jakarta.inject.Singleton;
 
 @Singleton
-public class ExampleRepository extends BaseRepository<ExampleEntity, UUID> {
+public class ExampleRepository<T> extends BaseRepository<T, UUID> {
 
-    public ExampleRepository() {
-        super(ExampleEntity.class);
+    public ExampleRepository(Class<T> type) {
+        super(type);
     }
 }
 ```
 
-`@Singleton` is `jakarta.inject.Singleton`. A no-arg constructor is enough for Guice; no explicit binding is required.
+`@Singleton` is `jakarta.inject.Singleton`. A generic repository needs an explicit binding per entity type; see [InitializerModule](#7-initializer-module). A concrete repository with a no-arg constructor can rely on Guice just-in-time binding.
 
-The trade-off is that `ORM` is no longer `final` and direct unit tests need Guice or reflection to populate it. Constructor injection remains an option for repositories that prefer explicit dependencies.
-
-Because the class lives in the `database` module, the `app` module can use it through its existing dependency on `database`.
-
-**Recommendation:** extend `BaseRepository` for standard CRUD. When a use case needs more control — explicit queries, locking, flush timing, batch operations, or direct session semantics — use `ORM` directly. The two approaches can be combined in the same repository class: every `BaseRepository` method is just an `ORM` transaction, so mixing inherited CRUD with custom `orm.execute(...)` calls is safe.
+`HibernateRepository<T, ID>` is an abstract convenience subclass of `BaseRepository`; it is available but is not used by the current application repositories.
 
 ### Entity registration
 
@@ -273,18 +304,44 @@ Entities are collected through a Guice multibinding of `Class<?>`:
 Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {});
 ```
 
-`DatabaseModule` creates the empty set. Feature modules in the application layer add their entity classes. `HibernateORMImpl` injects the resulting `Set<Class<?>>` and registers every element with `addAnnotatedClass`.
+`HibernateModule` creates the empty set. Feature modules in the application layer add their entity classes. `HibernateORMImpl` injects the resulting `Set<Class<?>>` and registers every element with `addAnnotatedClass`.
 
 ### DatabaseModule
 
-```java
-bind(Database.class).to(PostgresSQL.class).asEagerSingleton();
-bind(ORM.class).to(HibernateORM.class).asEagerSingleton();
+`DatabaseModule` installs the default implementation modules:
 
-Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {});
+```java
+install(new PostgresSQLModule());
+install(new HibernateModule());
 ```
 
-Both bindings are eager singletons, so the `SessionFactory` is created during injector creation, before Tomcat starts.
+`PostgresSQLModule` binds `PostgresSQLImpl`, `Database` and `PostgresSQLDatabase` as eager singletons.
+
+`HibernateModule` binds `HibernateORMImpl`, `ORM` and `HibernateORM` as eager singletons and creates the entity multibinder.
+
+Both bindings are eager, so the `SessionFactory` is created during injector creation, before Tomcat starts.
+
+### PersistenceModule and FilterModule
+
+`PersistenceModule` is the persistence entry point used by the launcher:
+
+```java
+install(new DatabaseModule());
+install(new FilterModule());
+```
+
+`FilterModule` contributes `OpenSessionInViewFilter` to the `Set<Filter>` multibinder:
+
+```java
+Multibinder.newSetBinder(binder(), Filter.class)
+        .addBinding()
+        .to(OpenSessionInViewFilter.class)
+        .asEagerSingleton();
+```
+
+The filter belongs to the module that owns the concern: the request-scoped persistence session is a persistence concern, so both the filter and its module live under `com.onix322.persistence.filter`.
+
+`OpenSessionInViewFilter.doFilter` calls `ORM.begin()`, runs the rest of the chain, and calls `ORM.end()` in a `finally` block. `begin()` opens the session; `end()` rolls back a dangling transaction and closes the session. Transactions remain per `ORM` call.
 
 ---
 
@@ -300,7 +357,9 @@ Server
 └── static void launch(Module... modules)
 
 TomcatServer
-GuiceHK2Bridge
+GuiceToHK2Bridge
+Hk2IntoGuiceBridge
+Hk2LocatorHolder
 ServerModule
 ```
 
@@ -320,7 +379,8 @@ Constructor-injected fields:
 - `Tomcat` — the embedded container;
 - `Configuration` — server settings;
 - `Injector` — passed to the Jersey bridge;
-- `Set<Filter>` — servlet filters contributed through Guice (empty by default).
+- `Hk2LocatorHolder` — filled by Jersey when the servlet starts;
+- `Set<Filter>` — servlet filters contributed through Guice.
 
 `start()`:
 
@@ -345,107 +405,196 @@ Constructor-injected fields:
 
 - creates a Jersey `ResourceConfig`;
 - scans the `com.onix322.app` package for JAX-RS components;
-- registers `GuiceHK2Bridge` with the application injector;
+- registers `GuiceToHK2Bridge` with the application injector and the locator holder;
 - creates a `ServletContainer` and registers it as the `jersey` servlet;
 - sets `loadOnStartup(1)`;
 - maps the servlet to `server.api.path` (`/*` by default).
 
-`filtersConfig(Context)` registers every `Filter` from the injected `Set<Filter>` with a `FilterDef` and a `FilterMap` on `/*`. Filters wrap the Jersey servlet, so they cover the whole request — including the Jackson serialization that happens after the resource method returns. This is how the application installs `OpenSessionInViewFilter` without the `server` module depending on `database`.
+`filtersConfig(Context)` registers every `Filter` from the injected `Set<Filter>` with a `FilterDef` and a `FilterMap` on `/*`. The filter name is the filter class name. Filters wrap the Jersey servlet, so they cover the whole request — including the Jackson serialization that happens after the resource method returns. This is how `OpenSessionInViewFilter` is installed without the `server` module depending on `persistence`.
 
-### GuiceHK2Bridge
+### Guice/HK2 bridges
 
-Jersey uses HK2 internally. The bridge is a JAX-RS `Feature` that connects the HK2 `ServiceLocator` to the Guice injector:
+Jersey uses HK2 internally, the application uses Guice, so both directions are bridged.
+
+**Guice → HK2.** `GuiceToHK2Bridge`, a JAX-RS `Feature`, connects the Jersey `ServiceLocator` to the Guice injector:
 
 ```java
 GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
 GuiceIntoHK2Bridge bridge = serviceLocator.getService(GuiceIntoHK2Bridge.class);
 bridge.bridgeGuiceInjector(injector);
+
+locatorHolder.set(serviceLocator);
 ```
 
 This lets Jersey-resolved components use Guice-managed dependencies, including `ORM`, `Configuration` and `Database`.
 
+**HK2 → Guice.** `Hk2IntoGuiceBridge`, installed by `ServerModule`, creates and binds `Hk2LocatorHolder` and registers a Guice `TypeListener` for fields annotated with `@HK2Inject`:
+
+```java
+@HK2Inject
+private UriInfo uriInfo;
+```
+
+The stock `HK2IntoGuiceBridge` module cannot be used directly: it needs the `ServiceLocator` when the injector is created, while Jersey creates that locator only when the servlet starts. The listener therefore reads the locator from `Hk2LocatorHolder`, filled by `GuiceToHK2Bridge` the first time Jersey initializes. Consequences:
+
+- only field injection works (no constructor or parameter injection for HK2 services);
+- a Guice object created before Jersey starts cannot resolve `@HK2Inject` fields;
+- the locator is Jersey's own, so request-scoped services such as `UriInfo` resolve per request.
+
 ### ServerModule
 
-Binds `Server` to `TomcatServer` and creates the servlet filter multibinding:
+Binds `Server` to `TomcatServer`, installs `Hk2IntoGuiceBridge`, and creates the servlet filter multibinding:
 
 ```java
 bind(Server.class).to(TomcatServer.class);
+install(new Hk2IntoGuiceBridge());
 
 Multibinder.newSetBinder(binder(), Filter.class);
 ```
 
-Application modules add filters to that set; `TomcatServer` registers everything it receives. The empty multibinder keeps `Set<Filter>` injectable when no filter is contributed.
+Modules that own a filter add it to that set; `TomcatServer` registers everything it receives. The empty multibinder keeps `Set<Filter>` injectable when no filter is contributed.
 
-Because the module binds the `Server` contract, the container is replaceable. An alternative implementation can be installed by providing another `Server` implementation and changing this binding. `Server.launch` and the rest of the application depend only on the interface.
+Because the module binds the `Server` contract, the container is replaceable. `Server.launch` and the rest of the application depend only on the interface.
 
 The `Tomcat` instance itself has no explicit binding. Guice creates it through just-in-time binding because `org.apache.catalina.startup.Tomcat` is a concrete class with a no-argument constructor.
 
 ---
 
-## 7. `context` module
+## 7. `initializer` module
 
-Package: `com.onix322.context`
+Package: `onix322.initializer` (the package currently has no `com.onix322` prefix in the codebase).
 
-`ApplicationContext` is a singleton Guice module:
+```text
+onix322.initializer
+├── TypeFactory
+└── guice/InitializerModule
+```
+
+`InitializerModule` registers a set of entity classes and binds one generic repository implementation per entity:
 
 ```java
-public class ApplicationContext extends AbstractModule {
-    private static final ApplicationContext INSTANCE = new ApplicationContext();
+public class InitializerModule extends AbstractModule {
 
-    public static ApplicationContext getInstance() { return INSTANCE; }
+    private final Set<Class<?>> entities;
+    private final Class<?> repository;
+
+    public InitializerModule(Set<Class<?>> entities, Class<?> repository) {
+        this.entities = entities;
+        this.repository = repository;
+    }
+
+    @Override
+    protected void configure() {
+        Multibinder<Class<?>> set =
+                Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {});
+        entities.forEach(entity -> set.addBinding().toInstance(entity));
+
+        Provider<TypeFactory> factory = getProvider(TypeFactory.class);
+        entities.forEach(entity -> register(entity, factory));
+    }
+
+    private void register(Class<?> entity, Provider<TypeFactory> factory) {
+        TypeLiteral key = TypeLiteral.get(Types.newParameterizedType(repository, entity));
+        bind(key).toProvider(() -> factory.get().create(entity, key)).in(Singleton.class);
+    }
+}
+```
+
+`TypeFactory` creates the repository reflectively:
+
+```java
+public <T, R extends BaseRepository<T, UUID>> R create(
+        Class<T> entityClass,
+        TypeLiteral<R> repositoryClass
+) {
+    Class<R> rawType = (Class<R>) repositoryClass.getRawType();
+    Constructor<R> constructor = rawType.getDeclaredConstructor(Class.class);
+    constructor.setAccessible(true);
+    R repository = constructor.newInstance(entityClass);
+    injector.injectMembers(repository);
+    return repository;
+}
+```
+
+This is required because a generic repository such as `VehicleRepository<T>` cannot be resolved by Guice from its erased type alone. `InitializerModule` creates the concrete `VehicleRepository<Van>` binding from the entity set.
+
+The module is not installed globally by `LauncherModule`. Each feature module that uses generic repositories installs it:
+
+```java
+install(new InitializerModule(VEHICLE_ENTITIES, VehicleRepository.class));
+```
+
+Feature modules that only register entities use the multibinder directly. `ReportModule` currently performs the same entity and repository binding inline with `TypeFactory`.
+
+---
+
+## 8. `launcher` module
+
+Package: `com.onix322.launcher`
+
+`LauncherModule` is the application composition root and contains the entry point:
+
+```java
+public class LauncherModule extends AbstractModule {
 
     @Override
     protected void configure() {
         install(new ServerModule());
         install(new ConfigModule());
-        install(new DatabaseModule());
+        install(new PersistenceModule());
+        install(new AppModule());
+    }
+
+    public static void main(String[] args) {
+        Server.launch(new LauncherModule());
     }
 }
 ```
 
-It aggregates the framework modules. Application feature modules are installed separately by the application entry point.
+`AppModule`, in the application layer, installs the feature modules. `LauncherModule` does not install `InitializerModule`; feature modules do that themselves.
 
 ---
 
-## 8. Startup sequence
+## 9. Startup sequence
 
 ```mermaid
 sequenceDiagram
-    participant Main as Application entry point
+    participant Main as LauncherModule.main
     participant Guice
     participant Config as ConfigModule
     participant DB as DatabaseModule
-    participant ORM as HibernateORM
+    participant ORM as HibernateORMImpl
     participant Srv as TomcatServer
 
-    Main->>Guice: createInjector(ApplicationContext, feature modules)
+    Main->>Guice: createInjector(LauncherModule)
     Guice->>Config: load application.properties
-    Guice->>DB: bind PostgresSQL + HibernateORM (eager)
+    Guice->>DB: bind PostgresSQLImpl + HibernateORMImpl (eager)
     Guice->>ORM: construct -> build SessionFactory
     Guice->>Srv: getInstance(Server)
     Main->>Srv: start()
-    Srv->>Srv: configure Tomcat + Jersey
+    Srv->>Srv: configure Tomcat + Jersey + filters
     Srv->>Srv: tomcat.start()
     Srv->>Srv: tomcat.getServer().await()
 ```
 
 Step by step:
 
-1. The application entry point calls `Server.launch(ApplicationContext.getInstance(), <feature modules>)`.
-2. Guice creates an injector from the framework module and the application feature modules.
+1. `LauncherModule.main` calls `Server.launch(new LauncherModule())`.
+2. Guice creates an injector from `LauncherModule`.
 3. `ConfigModule` loads `application.properties` from the classpath and binds every property as a named constant.
-4. `DatabaseModule` binds `Database` to `PostgresSQL` and `ORM` to `HibernateORMImpl` as eager singletons, and creates the entity multibinder set.
-5. Feature modules add their entity classes to the set.
-6. Guice constructs `PostgresSQL`, then `HibernateORMImpl`. The `SessionFactory` is built and connects to PostgreSQL according to the configured JDBC URL. With `hibernate.hbm2ddl.auto=update`, Hibernate updates the schema at this point.
-7. Guice resolves `Server` to `TomcatServer`. The `Tomcat` dependency is created through just-in-time binding; `Configuration` and `Injector` are injected.
-8. `server.start()` configures Tomcat and Jersey, opens the connector, starts the container and blocks on `await()`.
-9. The process stays alive until the JVM exits or the server is stopped programmatically.
+4. `PersistenceModule` installs `DatabaseModule` and `FilterModule`.
+5. `DatabaseModule` installs `PostgresSQLModule` and `HibernateModule`; both bind eager singletons and create the entity multibinder.
+6. `AppModule` installs the feature modules; feature modules add entities and generic repository bindings.
+7. Guice constructs `PostgresSQLImpl`, then `HibernateORMImpl`. The `SessionFactory` is built and connects to PostgreSQL according to the configured JDBC URL. With `hibernate.hbm2ddl.auto=create-drop`, Hibernate drops and recreates the schema at this point.
+8. Guice resolves `Server` to `TomcatServer`. `Tomcat` is created through just-in-time binding; `Configuration`, `Injector`, `Hk2LocatorHolder` and `Set<Filter>` are injected.
+9. `server.start()` configures Tomcat, Jersey and the filters, opens the connector, starts the container and blocks on `await()`.
+10. The process stays alive until the JVM exits or the server is stopped programmatically.
 
 If `start()` throws, `Server.launch` calls `server.kill()` and wraps the exception in a `RuntimeException`. Failures during injector creation or `getInstance(Server.class)` occur before that try block and propagate directly.
 
 ---
 
-## 9. Request lifecycle
+## 10. Request lifecycle
 
 ```mermaid
 sequenceDiagram
@@ -473,7 +622,7 @@ Step by step:
 
 1. The client connects to the Tomcat connector on `server.port` (default `8080`).
 2. The request enters the configured context (`server.context.path`, root by default).
-3. The `OpenSessionInViewFilter` contributed by the application opens the session scope with `ORM.begin()`.
+3. `OpenSessionInViewFilter`, contributed by `FilterModule` from the `persistence` module, opens the session scope with `ORM.begin()`.
 4. Tomcat routes the request to the `jersey` servlet because `server.api.path` is `/*`.
 5. Jersey scans `com.onix322.app` for JAX-RS components and matches the request against an application resource.
 6. The resource executes and returns an entity or a `Response`.
@@ -485,7 +634,7 @@ Unregistered paths are handled by Jersey and produce a `404`. Without a custom e
 
 ---
 
-## 10. Dependency injection
+## 11. Dependency injection
 
 The application uses two containers:
 
@@ -494,7 +643,7 @@ The application uses two containers:
 | Guice | Application | Singletons, configuration, database, server, feature bindings |
 | HK2 | Jersey internals | Resource discovery and JAX-RS component lifecycle |
 
-`GuiceHK2Bridge` connects them. Guice remains the source of truth for application services; HK2 delegates resolution to Guice for components that need injected dependencies.
+`GuiceToHK2Bridge` and `Hk2IntoGuiceBridge` connect them in both directions. Guice remains the source of truth for application services; HK2 delegates resolution to Guice for components that need injected dependencies, and Guice objects can resolve HK2 services through `@HK2Inject` fields.
 
 The two containers do not treat injection annotations identically:
 
@@ -506,12 +655,13 @@ The two containers do not treat injection annotations identically:
 
 HK2 selects resource constructors by looking for `jakarta.inject.Inject`. `com.google.inject.Inject` is ignored there, so a resource annotated only with the Guice annotation fails with `NoSuchMethodException: Could not find a suitable constructor`. Guice 7 accepts the Jakarta annotation too, so `jakarta.inject.Inject` is the single annotation used across the project.
 
-Guice bindings are only required for interfaces, qualifiers, providers, and explicit implementation choices. Concrete classes annotated with `@Singleton` and an injectable constructor receive a just-in-time binding and do not need an explicit `bind(...)`. JAX-RS resources are created by Jersey, not Guice, so binding them in a Guice module has no effect.
+Guice bindings are only required for interfaces, qualifiers, providers, and explicit implementation choices. Concrete classes annotated with `@Singleton` and an injectable constructor receive a just-in-time binding and do not need an explicit `bind(...)`. Generic repositories are the exception: their type parameters are erased, so they are bound explicitly by `InitializerModule` or an equivalent provider. JAX-RS resources are created by Jersey, not Guice, so binding them in a Guice module has no effect.
 
-Injection style in the framework:
+Injection style in the project:
 
 - constructor injection;
 - Lombok `@AllArgsConstructor(onConstructor_ = @Inject)` or `@RequiredArgsConstructor(onConstructor_ = @Inject)` for concise constructors;
+- field injection only where a constructor cannot express the dependency, such as the generic `BaseRepository` and `@HK2Inject` fields;
 - interface-to-implementation bindings in Guice modules.
 
 Prefer the Jakarta annotations (`jakarta.inject.Inject`, `jakarta.inject.Singleton`, `jakarta.inject.Named`, `jakarta.inject.Qualifier`) over their Guice equivalents. Guice 7 supports the Jakarta API, and HK2 supports it for resources, so one annotation set works across both containers. Keep Guice annotations only where Jakarta has no equivalent: `@Provides`, `@ImplementedBy`, `@ProvidedBy`, optional `@Inject`, and Guice-specific scopes.
@@ -520,8 +670,8 @@ Prefer the Jakarta annotations (`jakarta.inject.Inject`, `jakarta.inject.Singlet
 
 | Annotation | Applied to | Where it is used |
 | --- | --- | --- |
-| `jakarta.inject.Inject` | constructor or field | framework implementation constructors (`ConfigurationImpl`, `PostgresSQL`, `HibernateORMImpl`, `TomcatServer`), application services and resources, the `orm` field of `BaseRepository` |
-| `jakarta.inject.Singleton` | concrete class | `ConfigurationLoader`, `PropertyParser`, `ConfigurationImpl`, `PostgresSQL`, `HibernateORMImpl`, `TomcatServer`, repositories, services |
+| `jakarta.inject.Inject` | constructor or field | framework implementation constructors, `TypeFactory`, application services and resources, the `orm` field of `BaseRepository` |
+| `jakarta.inject.Singleton` | concrete class | `ConfigurationLoader`, `PropertyParser`, `ConfigurationImpl`, `PostgresSQLImpl`, `HibernateORMImpl`, `TomcatServer`, modules, repositories, services |
 | `jakarta.inject.Named` | constructor parameter or field | a dependency that consumes a named property binding, for example `@Named("server.port")` |
 | `jakarta.inject.Qualifier` | custom annotation | user-defined qualifiers used to select between alternative implementations |
 
@@ -562,21 +712,21 @@ Typed access is provided by `Configuration`, which parses the raw values.
 
 ---
 
-## 11. Persistence model
+## 12. Persistence model
 
 ### Entity discovery
 
 ```text
-DatabaseModule       ──creates──►  Multibinder<Class<?>>
+HibernateModule      ──creates──►  Multibinder<Class<?>>
 Application modules  ──adds─────►  entity classes
-HibernateORM         ──injects──►  Set<Class<?>>
+HibernateORMImpl     ──injects──►  Set<Class<?>>
 ```
 
-`HibernateORMImpl` registers every class in the set with Hibernate's `Configuration.addAnnotatedClass`. New entities become visible to Hibernate when an application feature module adds them to the set.
+`HibernateORMImpl` registers every class in the set with Hibernate's `Configuration.addAnnotatedClass`. New entities become visible to Hibernate when an application feature module adds them to the set, either directly or through `InitializerModule`.
 
 ### Schema management
 
-The schema strategy is controlled by `hibernate.hbm2ddl.auto`, currently `update`. Hibernate creates or updates tables to match the mapped entities during `SessionFactory` creation.
+The schema strategy is controlled by `hibernate.hbm2ddl.auto`, currently `create-drop` in `config/src/main/resources/application.properties`. Hibernate drops and recreates tables to match the mapped entities during `SessionFactory` creation. This destroys existing data on every startup; use another strategy for environments where data must survive restarts.
 
 ### Transaction boundary
 
@@ -594,17 +744,17 @@ orm.execute(em -> em.persist(entity));
 
 Each call runs in its own transaction. A unit of work spans multiple calls only through `begin()` / `end()`, which share the session, not the transaction. This is what makes lazy loading inside a response work: the session stays open until the request ends, while each `ORM` call still commits or rolls back on its own.
 
-The application opens the scope per HTTP request through `OpenSessionInViewFilter`, registered as a servlet filter by `TomcatServer`. Outside a request (`begin()` not called), behaviour is unchanged: session and transaction are opened and closed per call.
+The application opens the scope per HTTP request through `OpenSessionInViewFilter`, contributed by `FilterModule` and registered as a servlet filter by `TomcatServer`. Outside a request (`begin()` not called), behaviour is unchanged: session and transaction are opened and closed per call.
 
 ---
 
-## 12. Extension points
+## 13. Extension points
 
 ### Add a framework module
 
 1. Create a Maven module that depends on `config` when it needs configuration.
 2. Create an `AbstractModule` that binds its contracts.
-3. Install the module from `ApplicationContext`.
+3. Install the module from `LauncherModule`.
 4. Add the module to the parent `pom.xml`.
 
 The application layer does not need to change unless it uses the new contract.
@@ -614,14 +764,14 @@ The application layer does not need to change unless it uses the new contract.
 The technical contracts are `Database`, `ORM` and `Server`. To replace one:
 
 1. implement the contract;
-2. change the binding in the relevant Guice module (`DatabaseModule` or `ServerModule`);
+2. change the binding in the relevant Guice module (`PostgresSQLModule`, `HibernateModule` or `ServerModule`);
 3. keep the startup path and application code unchanged.
 
 For example, replacing Tomcat requires a new `Server` implementation and a different binding in `ServerModule`; `Server.launch(...)` remains the same.
 
 ### Plug in application features
 
-Application feature modules register their entities and services through Guice modules. The framework discovers entities through the `Set<Class<?>>` multibinding and discovers REST resources through the Jersey package scan.
+Application feature modules register their entities and services through Guice modules. The framework discovers entities through the `Set<Class<?>>` multibinding and discovers REST resources through the Jersey package scan. Generic repositories additionally use `InitializerModule` or a local `TypeFactory` provider binding.
 
 See [APPLICATION.md](APPLICATION.md) for the application implementation model.
 
@@ -633,7 +783,7 @@ See [APPLICATION.md](APPLICATION.md) for the application implementation model.
 
 ---
 
-## 13. Versions
+## 14. Versions
 
 Dependency versions are declared in the parent [`pom.xml`](../pom.xml). The `guice-bridge` version is declared in [`server/pom.xml`](../server/pom.xml).
 
@@ -652,17 +802,18 @@ Exact coordinates and versions are maintained in Maven, not duplicated in this d
 
 ---
 
-## 14. Runtime topology
+## 15. Runtime topology
 
 ```text
 ┌──────────────────────────────────────────────┐
 │ JVM (Java 21)                                │
 │                                              │
-│  Application entry point                     │
+│  LauncherModule.main                        │
 │    └── Guice injector                        │
 │          ├── Configuration                    │
-│          ├── PostgresSQL DataSource           │
-│          ├── HibernateORM SessionFactory      │
+│          ├── PostgresSQLImpl DataSource       │
+│          ├── HibernateORMImpl SessionFactory  │
+│          ├── OpenSessionInViewFilter          │
 │          └── TomcatServer                     │
 │                └── embedded Tomcat :8080      │
 │                      └── Jersey servlet /*    │
@@ -677,13 +828,14 @@ The framework runs in a single JVM process with a single outbound dependency: th
 
 ---
 
-## 15. Summary
+## 16. Summary
 
-- **Framework layer:** `config`, `database`, `server`, `context`.
+- **Framework layer:** `config`, `persistence`, `server`, `launcher`.
+- **Support module:** `initializer`, used for generic entity/repository registration.
 - **Contracts:** `Configuration`, `Database`, `ORM`, `Server`.
 - **Dependency direction:** framework modules depend on `config`; the application depends on framework contracts.
-- **Server:** embedded Tomcat + Jersey, started programmatically.
-- **DI:** Guice for application services, HK2 for Jersey internals, bridge between them.
+- **Server:** embedded Tomcat + Jersey, started programmatically from `LauncherModule.main`.
+- **DI:** Guice for application services, HK2 for Jersey internals, bridge between them in both directions.
 - **Persistence:** Hibernate `SessionFactory` built eagerly from a PostgreSQL `DataSource`; entities registered through a Guice multibinder.
 - **Transactions:** callback-based `ORM` API, one transaction per call, plus a per-request session scope (`begin()` / `end()`) that keeps lazy loading alive during serialization.
 - **Configuration:** classpath `application.properties`, typed access through `Configuration`, named Guice bindings for every property.

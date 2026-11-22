@@ -7,16 +7,19 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.AllArgsConstructor;
 
 import java.util.UUID;
 
 @Path("/vehicle/van")
-@AllArgsConstructor(onConstructor_ = @Inject)
 @Singleton
 public class VanController {
 
     private VehicleService<Van> service;
+
+    @Inject
+    public VanController(VehicleService<Van> service) {
+        this.service = service;
+    }
 
     @POST
     @Path("/create")

@@ -8,7 +8,10 @@ import jakarta.inject.Singleton;
 @Singleton
 public class ImageService {
 
-    @Inject
-    private ImageRepository<ImageAbstract> imageRepository;
+    private final ImageRepository<ImageAbstract> imageRepository;
 
+    @Inject
+    public ImageService(ImageRepository<ImageAbstract> imageRepository) {
+        this.imageRepository = imageRepository;
+    }
 }

@@ -12,10 +12,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Singleton
-@AllArgsConstructor(onConstructor_ = @Inject)
 public class VehicleService<T extends VehicleAbstract> {
 
-    private VehicleRepository<T> vanRepository;
+    private final VehicleRepository<T> vanRepository;
+
+    @Inject
+    public VehicleService(VehicleRepository<T> vanRepository) {
+        this.vanRepository = vanRepository;
+    }
 
     public T create(T van) {
         if (van.getDetails() == null || van.getImages().isEmpty()) {
