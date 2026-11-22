@@ -29,9 +29,5 @@
             <groupId>com.onix322</groupId>
             <artifactId>initializer</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.onix322</groupId>
-            <artifactId>context</artifactId>
-        </dependency>
     </dependencies>
 </project>

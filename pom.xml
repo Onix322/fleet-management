@@ -13,7 +13,7 @@
         <module>config</module>
         <module>persistence</module>
         <module>server</module>
-        <module>context</module>
+        <module>launcher</module>
         <module>app</module>
         <module>initializer</module>
     </modules>
@@ -57,7 +57,7 @@
             </dependency>
             <dependency>
                 <groupId>com.onix322</groupId>
-                <artifactId>context</artifactId>
+                <artifactId>launcher</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
