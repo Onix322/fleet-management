@@ -1,6 +1,6 @@
 package com.onix322.app.persistence;
 
-import com.onix322.database.ORM;
+import com.onix322.persistence.database.ORM;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.Filter;

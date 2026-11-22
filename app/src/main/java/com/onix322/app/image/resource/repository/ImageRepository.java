@@ -1,6 +1,6 @@
 package com.onix322.app.image.resource.repository;
 
-import com.onix322.database.repository.BaseRepository;
+import com.onix322.persistence.repository.BaseRepository;
 import jakarta.inject.Singleton;
 
 import java.util.UUID;

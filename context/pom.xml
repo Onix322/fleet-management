@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.onix322</groupId>
-            <artifactId>database</artifactId>
+            <artifactId>persistence</artifactId>
         </dependency>
         <dependency>
             <groupId>com.onix322</groupId>
