@@ -1,46 +1,43 @@
 package com.onix322.app.report.guice;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import com.onix322.app.report.resource.model.Report;
+import com.google.inject.util.Types;
 import com.onix322.app.report.resource.model.ReportAbstract;
 import com.onix322.app.report.resource.model.impl.DamageReport;
 import com.onix322.app.report.resource.model.impl.InspectionReport;
 import com.onix322.app.report.resource.repository.ReportRepository;
-import com.onix322.app.vehicle.resource.model.VehicleMotorized;
-import com.onix322.app.vehicle.resource.model.VehicleNonMotorized;
-import com.onix322.app.vehicle.resource.model.impl.Van;
-import com.onix322.app.vehicle.resource.repository.VehicleRepository;
+import jakarta.inject.Singleton;
+import onix322.initializer.TypeFactory;
+
+import java.util.List;
 
 @Singleton
 public class ReportModule extends AbstractModule {
+
+    private static final List<Class<?>> REPORT_ENTITIES = List.of(
+            ReportAbstract.class,
+            InspectionReport.class,
+            DamageReport.class
+    );
+
     @Override
     protected void configure() {
         Multibinder<Class<?>> entities = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {
         });
 
-        entities.addBinding().toInstance(ReportAbstract.class);
-        entities.addBinding().toInstance(InspectionReport.class);
-        entities.addBinding().toInstance(DamageReport.class);
+        REPORT_ENTITIES.forEach(entity -> entities.addBinding().toInstance(entity));
+
+        Provider<TypeFactory> factory = getProvider(TypeFactory.class);
+        REPORT_ENTITIES.forEach(entity -> registerRepository(entity, factory, ReportRepository.class));
     }
 
-    @Provides
-    public ReportRepository<InspectionReport> provideInspectionReportRepository(Injector injector) {
-        ReportRepository<InspectionReport> reportRepository = new ReportRepository<>(InspectionReport.class);
-        injector.injectMembers(reportRepository);
-        return reportRepository;
-    }
-    @Provides
-    public ReportRepository<DamageReport> provideDamageReportRepository(Injector injector) {
-        ReportRepository<DamageReport> reportRepository = new ReportRepository<>(DamageReport.class);
-        injector.injectMembers(reportRepository);
-        return reportRepository;
-    }
-
-    @Provides
-    public ReportRepository<ReportAbstract> provideReportRepository(Injector injector) {
-        ReportRepository<ReportAbstract> reportRepository = new ReportRepository<>(ReportAbstract.class);
-        injector.injectMembers(reportRepository);
-        return reportRepository;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> void registerRepository(Class<?> entity, Provider<TypeFactory> factory, Class<T> repository) {
+        TypeLiteral key = TypeLiteral.get(Types.newParameterizedType(repository, entity));
+        bind(key).toProvider(() -> factory.get().create(entity, key))
+                .in(Singleton.class);
     }
 }
