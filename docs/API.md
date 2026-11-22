@@ -69,6 +69,8 @@ Return explicit status codes:
 | Conflict | `409 Conflict` |
 | Unsupported media type | `415 Unsupported Media Type` |
 
+The current controllers return `Response` objects with explicit codes. A controller may return `200 OK` with a result body for operations where another status could also be valid; document the actual contract of each endpoint when it is added.
+
 ---
 
 ## 3. Defining a resource
@@ -77,6 +79,7 @@ A resource is a class under `com.onix322.app.<feature>.resource.controller` with
 
 ```java
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -88,12 +91,13 @@ import jakarta.ws.rs.core.Response;
 @Path("/examples")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ExampleResource {
+@Singleton
+public class ExampleController {
 
     private final ExampleService service;
 
     @Inject
-    public ExampleResource(ExampleService service) {
+    public ExampleController(ExampleService service) {
         this.service = service;
     }
 
@@ -134,6 +138,19 @@ Jackson serializes public getters and deserializes JSON into the declared parame
 - `null` fields are serialized as `null` unless Jackson is configured otherwise.
 - Java time types require the Jackson JSR-310 module to be registered on the `ObjectMapper`; the dependency is available in the project.
 
+### Polymorphic types
+
+Entities that use Jackson polymorphism declare a discriminator property with `@JsonTypeInfo` and concrete names with `@JsonSubTypes`:
+
+```json
+{
+  "type": "example_a",
+  "name": "Example"
+}
+```
+
+The discriminator property name is chosen per hierarchy. Current entity hierarchies use names such as `type` and `vehicle_type`; clients must send the property declared by the hierarchy they are addressing. A value that is not registered in `@JsonSubTypes` is rejected by Jackson.
+
 ### Entities versus API types
 
 | Situation | Recommendation |
@@ -149,7 +166,7 @@ Keep API types under the feature's `resource/model` package.
 
 ## 5. Error responses
 
-There is no global error format by default. Choose a consistent shape, for example:
+There is no global error format by default. The current controllers catch expected exceptions and return a `Response` with a status code and a message; there is no `ExceptionMapper` yet. Choose a consistent shape when you add one, for example:
 
 ```json
 {
@@ -269,7 +286,7 @@ Use the same base URL that matches `server.port` and `server.context.path`.
 - [ ] `@Path` with a clear, stable name;
 - [ ] HTTP method annotations;
 - [ ] `@Produces` and `@Consumes` where relevant;
-- [ ] service injected through the constructor;
+- [ ] service injected through the constructor with `jakarta.inject.Inject`;
 - [ ] request/response types chosen;
 - [ ] explicit status codes;
 - [ ] error behavior defined;

@@ -111,21 +111,21 @@ The default implementations are:
 
 | Contract | Default implementation | Technology |
 | --- | --- | --- |
-| `Database` | `PostgresSQL` | PostgreSQL JDBC (`PGSimpleDataSource`) |
+| `Database` | `PostgresSQLImpl` | PostgreSQL JDBC (`PGSimpleDataSource`) |
 | `ORM` | `HibernateORMImpl` | Hibernate ORM |
 
-Both are selected in `DatabaseModule`. Replacing an implementation is a framework-layer change; see [FRAMEWORK.md](FRAMEWORK.md).
+`PostgresSQLModule` binds the `Database` implementation, `HibernateModule` binds the `ORM` implementation, and `DatabaseModule` installs both. Replacing an implementation is a framework-layer change; see [FRAMEWORK.md](FRAMEWORK.md).
 
 ### 4.1 Property ownership
 
 | Group | Properties | Owner | Database-specific? | Hibernate-specific? |
 | --- | --- | --- | --- | --- |
 | General server | `server.port`, `server.base.dir`, `server.context.path`, `server.api.path` | `TomcatServer` / Jersey | No | No |
-| General database connection | `database.url`, `database.user`, `database.password` | `Database` implementation (default `PostgresSQL`) | No | No |
+| General database connection | `database.url`, `database.user`, `database.password` | `Database` implementation (default `PostgresSQLImpl`) | No | No |
 | Hibernate dialect | `hibernate.dialect` | `HibernateORMImpl` | No (the value names PostgreSQL) | Yes |
 | Hibernate behavior | `hibernate.hbm2ddl.auto`, `hibernate.show_sql`, `hibernate.format_sql` | `HibernateORMImpl` | No | Yes |
 
-The `database.url`, `database.user` and `database.password` keys are **general connection properties**. They are not tied to PostgreSQL: any `Database` implementation can read them and map them to its own driver. The default implementation (`PostgresSQL`) happens to interpret them as PostgreSQL JDBC settings.
+The `database.url`, `database.user` and `database.password` keys are **general connection properties**. They are not tied to PostgreSQL: any `Database` implementation can read them and map them to its own driver. The default implementation (`PostgresSQLImpl`) happens to interpret them as PostgreSQL JDBC settings.
 
 Property names are implementation details, not part of the `Database` or `ORM` contracts. A replacement implementation can read different keys.
 
@@ -149,15 +149,15 @@ Notes:
 
 ### 4.3 General database connection properties
 
-These properties are read by the default `Database` implementation, `PostgresSQL`, and passed to `PGSimpleDataSource`. The keys themselves are **generic connection settings**, not PostgreSQL-specific: any database implementation can consume the same keys if it maps them to its driver.
+These properties are read by the default `Database` implementation, `PostgresSQLImpl`, and passed to `PGSimpleDataSource`. The keys themselves are **generic connection settings**, not PostgreSQL-specific: any database implementation can consume the same keys if it maps them to its driver.
 
-| Property | Type | Default | Behavior in `PostgresSQL` |
+| Property | Type | Default | Behavior in `PostgresSQLImpl` |
 | --- | --- | --- | --- |
 | `database.url` | `String` | `jdbc:postgresql://localhost:5432/postgres` | JDBC URL passed to `PGSimpleDataSource.setUrl` |
 | `database.user` | `String` | `root` | Database user passed to `PGSimpleDataSource.setUser` |
 | `database.password` | `String` | `root` | Database password passed to `PGSimpleDataSource.setPassword` |
 
-The default value of `database.url` is a PostgreSQL JDBC URL only because `PostgresSQL` is the default implementation. When another `Database` implementation is bound, the same keys can hold a URL for that database.
+The default value of `database.url` is a PostgreSQL JDBC URL only because `PostgresSQLImpl` is the default implementation. When another `Database` implementation is bound, the same keys can hold a URL for that database.
 
 `HibernateORMImpl` obtains the `DataSource` from the `Database` contract while building the `SessionFactory`; it does not read `database.url`, `database.user`, or `database.password` directly.
 
@@ -168,13 +168,13 @@ These properties are read by `HibernateORMImpl`. They configure the default `ORM
 | Property | Type | Default | Behavior |
 | --- | --- | --- | --- |
 | `hibernate.dialect` | `String` | `org.hibernate.dialect.PostgreSQLDialect` | Hibernate dialect, passed to `AvailableSettings.DIALECT` |
-| `hibernate.hbm2ddl.auto` | `String` | `update` | Passed to `AvailableSettings.HBM2DDL_AUTO` |
+| `hibernate.hbm2ddl.auto` | `String` | `create-drop` | Passed to `AvailableSettings.HBM2DDL_AUTO`; drops and recreates the schema on startup |
 | `hibernate.show_sql` | `Boolean` | `true` | Passed to `AvailableSettings.SHOW_SQL` |
 | `hibernate.format_sql` | `Boolean` | `true` | Passed to `AvailableSettings.FORMAT_SQL` |
 
 All `hibernate.*` properties are read from `Configuration` by `HibernateORMImpl`, not by the `Database` implementation. The `Database` contract only supplies the `DataSource`; the dialect is supplied by the ORM.
 
-With `hibernate.hbm2ddl.auto=update`, Hibernate creates or updates the schema to match the registered entities when `HibernateORMImpl.init()` builds the `SessionFactory`.
+With `hibernate.hbm2ddl.auto=create-drop`, Hibernate drops and recreates the schema to match the registered entities when `HibernateORMImpl` builds the `SessionFactory` in its constructor. Existing data is lost on every startup.
 
 ### 4.5 Complete default file
 
@@ -185,14 +185,14 @@ server.base.dir=
 server.context.path=
 server.api.path=/*
 
-# General database connection (read by the default Database implementation: PostgresSQL)
+# General database connection (read by the default Database implementation: PostgresSQLImpl)
 database.url=jdbc:postgresql://localhost:5432/postgres
 database.user=root
 database.password=root
 
-# Hibernate (default ORM implementation: HibernateORM)
+# Hibernate (default ORM implementation: HibernateORMImpl)
 hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-hibernate.hbm2ddl.auto=update
+hibernate.hbm2ddl.auto=create-drop
 hibernate.show_sql=true
 hibernate.format_sql=true
 ```
@@ -202,14 +202,14 @@ hibernate.format_sql=true
 To replace PostgreSQL, which is only the default `Database` implementation:
 
 1. implement the `Database` contract;
-2. bind `Database` to the new implementation in `DatabaseModule`;
+2. bind `Database` to the new implementation in `PostgresSQLModule` (or a replacement implementation module);
 3. keep using the general `database.url`, `database.user` and `database.password` keys if the new implementation reads them, or use different keys;
 4. update this document and [FRAMEWORK.md](FRAMEWORK.md).
 
 To replace Hibernate:
 
 1. implement the `ORM` contract;
-2. bind `ORM` to the new implementation in `DatabaseModule`;
+2. bind `ORM` to the new implementation in `HibernateModule` (or a replacement implementation module);
 3. replace or remove the `hibernate.*` keys according to the new implementation;
 4. update this document and [FRAMEWORK.md](FRAMEWORK.md).
 
@@ -224,7 +224,7 @@ The `server.*` properties and the general `database.*` connection keys are unaff
 3. Restart the application.
 
 ```bash
-mvn clean package
+mvn -o package
 ```
 
 Because the file is a classpath resource, a running process keeps the values loaded at startup. Changes require a restart.
@@ -237,21 +237,21 @@ Multiple environment-specific property files are not present; the build uses the
 
 ### Database credentials (general, read by the default `Database` implementation)
 
-`database.user` and `database.password` are general connection properties; the default `PostgresSQL` implementation reads them. The default values are development credentials stored as plain text in the properties file. Treat the file as sensitive when the application uses non-development credentials, and restrict access to the built artifact accordingly.
+`database.user` and `database.password` are general connection properties; the default `PostgresSQLImpl` implementation reads them. The default values are development credentials stored as plain text in the properties file. Treat the file as sensitive when the application uses non-development credentials, and restrict access to the built artifact accordingly.
 
 ### Schema management (Hibernate, default `ORM` implementation)
 
-`hibernate.hbm2ddl.auto=update` is a Hibernate setting. It lets Hibernate modify the database schema at startup, derived from the registered entities. A replacement `ORM` implementation decides schema handling on its own and may not use this key.
+`hibernate.hbm2ddl.auto=create-drop` is a Hibernate setting. It drops and recreates the database schema at startup, derived from the registered entities, so existing data is lost. A replacement `ORM` implementation decides schema handling on its own and may not use this key.
 
 ### Connection creation (default `Database` implementation)
 
-`PostgresSQL.getDataSource()` returns a `PGSimpleDataSource` configured with URL, user and password. `HibernateORMImpl` obtains the `DataSource` through the `Database` contract once, while constructing the `SessionFactory`. A replacement `Database` implementation can build its own data source from the general `database.*` keys or from different keys.
+`PostgresSQLImpl.getDataSource()` returns a `PGSimpleDataSource` configured with URL, user and password. `HibernateORMImpl` obtains the `DataSource` through the `Database` contract once, while constructing the `SessionFactory`. A replacement `Database` implementation can build its own data source from the general `database.*` keys or from different keys.
 
 ### Instance scope
 
-`ConfigurationLoader`, `ConfigurationImpl`, `PropertyParser`, `PostgresSQL` and `HibernateORMImpl` are singletons. Property values are read from the loaded `Properties` object for the lifetime of the process.
+`ConfigurationLoader`, `ConfigurationImpl`, `PropertyParser`, `PostgresSQLImpl` and `HibernateORMImpl` are singletons. Property values are read from the loaded `Properties` object for the lifetime of the process.
 
-`PostgresSQL` and `HibernateORMImpl` are the default contract implementations; the singleton scope belongs to the framework wiring, not to the property keys.
+`PostgresSQLImpl` and `HibernateORMImpl` are the default contract implementations; the singleton scope belongs to the framework wiring, not to the property keys.
 
 ---
 
