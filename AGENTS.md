@@ -53,8 +53,8 @@ These rules are the source of truth for every session on this repository.
 - Concrete `@Singleton` classes with injectable constructors use Guice JIT
   bindings. Explicit bindings are only needed for interfaces, qualifiers,
   providers, and implementation choices.
-- `BaseRepository<T, ID>` lives in `com.onix322.database.repository`
-  (framework `database` module) and is the recommended default for
+- `BaseRepository<T, ID>` lives in `com.onix322.persistence.repository`
+  (framework `persistence` module) and is the recommended default for
   application repositories. It uses field injection
   (`@Inject protected ORM orm;`) and a constructor
   `BaseRepository(Class<T> type)`. Subclasses only pass the entity type.
