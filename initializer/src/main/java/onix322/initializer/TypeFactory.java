@@ -17,6 +17,8 @@ public class TypeFactory {
     }
 
     public <T, R extends BaseRepository<T, UUID>> R create(Class<T> entityClass, TypeLiteral<R> repositoryClass) {
+        if (entityClass == null || repositoryClass == null)
+            throw new IllegalArgumentException("Entity class and repository class cannot be null");
         try {
             @SuppressWarnings("unchecked")
             Class<R> classRawType = (Class<R>) repositoryClass.getRawType();
