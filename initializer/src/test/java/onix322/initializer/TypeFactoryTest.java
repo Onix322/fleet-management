@@ -27,7 +27,7 @@ public class TypeFactoryTest {
     }
 
     @Test
-    public void testCreateRepository() {
+    public void testCreateSuccess() {
 
         TestRepositoryInFactory result = factory.create(
                 TestEntity.class,
@@ -36,6 +36,42 @@ public class TypeFactoryTest {
 
         assertEquals(TestRepositoryInFactory.class, result.getClass());
         verify(injector).injectMembers(result);
+    }
+
+    @Test
+    public void testCreateIllegalArgumentException() {
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            factory.create(
+                    TestEntity.class,
+                    null
+            );
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            factory.create(
+                    null,
+                    new TypeLiteral<TestRepositoryInFactory>() {}
+            );
+        });
+
+        verify(injector, never()).injectMembers(any());
+    }
+
+
+    @Test
+    public void testCreateReflectiveOperationException() {
+
+        doThrow(RuntimeException.class).when(injector).injectMembers(any());
+
+        assertThrows(RuntimeException.class, () -> {
+            factory.create(
+                    TestEntity.class,
+                    new TypeLiteral<TestRepositoryInFactory>() {}
+            );
+        });
+
+        verify(injector).injectMembers(any());
     }
 }
 
