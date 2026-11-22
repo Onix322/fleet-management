@@ -1,8 +1,8 @@
 package com.onix322.app.integration.controller;
 
-import com.onix322.app.report.resource.controller.ReportController;
+import com.onix322.app.report.resource.controller.InspectionReportController;
 import com.onix322.app.report.resource.model.impl.InspectionReport;
-import com.onix322.app.report.resource.service.InspectionReportService;
+import com.onix322.app.report.resource.service.ReportService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +25,13 @@ import static org.mockito.Mockito.when;
 public class InspectionReportControllerTest {
 
     @Mock
-    private InspectionReportService reportService;
+    private ReportService<InspectionReport> reportService;
 
-    private ReportController reportController;
+    private InspectionReportController reportController;
 
     @BeforeEach
     public void setUpEach() {
-        this.reportController = new ReportController(this.reportService);
+        this.reportController = new InspectionReportController(this.reportService);
     }
 
     @ParameterizedTest

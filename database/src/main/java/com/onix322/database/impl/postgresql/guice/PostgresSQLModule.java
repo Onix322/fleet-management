@@ -1,0 +1,16 @@
+package com.onix322.database.impl.postgresql.guice;
+
+import com.google.inject.AbstractModule;
+import com.onix322.database.Database;
+import com.onix322.database.impl.postgresql.PostgresSQLDatabase;
+import com.onix322.database.impl.postgresql.impl.PostgresSQLImpl;
+
+public class PostgresSQLModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(PostgresSQLImpl.class).asEagerSingleton();
+        bind(Database.class).to(PostgresSQLImpl.class).asEagerSingleton();
+        bind(PostgresSQLDatabase.class).to(PostgresSQLImpl.class).asEagerSingleton();
+    }
+
+}

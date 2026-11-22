@@ -1,7 +1,7 @@
-package com.onix322.database.impl;
+package com.onix322.database.impl.postgresql.impl;
 
 import com.onix322.config.Configuration;
-import com.onix322.database.Database;
+import com.onix322.database.impl.postgresql.PostgresSQLDatabase;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 
 @Singleton
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class PostgresSQL implements Database {
+public class PostgresSQLImpl implements PostgresSQLDatabase {
 
     private final Configuration configuration;
 

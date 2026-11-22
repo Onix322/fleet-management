@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @DiscriminatorValue("damage_details")
 public class DamageDetails extends DetailsAbstract {
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "damage_id", referencedColumnName = "id")
     private DamageAbstract damage;
 }

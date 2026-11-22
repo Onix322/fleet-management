@@ -1,6 +1,7 @@
 package com.onix322.app.report.resource.service;
 
 
+import com.onix322.app.report.resource.model.ReportAbstract;
 import com.onix322.app.report.resource.model.impl.InspectionReport;
 import com.onix322.app.report.resource.repository.ReportRepository;
 import jakarta.inject.Inject;
@@ -14,17 +15,17 @@ import java.util.UUID;
 
 @Singleton
 @AllArgsConstructor(onConstructor_ = @Inject)
-public class InspectionReportService {
-    private ReportRepository reportRepository;
+public class ReportService<T extends ReportAbstract> {
+   private ReportRepository<T> reportRepository;
 
-    public InspectionReport create(InspectionReport report) {
+    public T create(T report) {
         if (report.getVehicle().getId() == null || report.getDetails() == null) {
             throw new IllegalArgumentException("Vehicle id and details are required");
         }
         return reportRepository.save(report);
     }
 
-    public List<InspectionReport> getAll() {
+    public List<T> getAll() {
         return reportRepository.findAll();
     }
 
@@ -33,14 +34,14 @@ public class InspectionReportService {
         return reportRepository.delete(id);
     }
 
-    public InspectionReport getById(UUID id) {
-        Optional<InspectionReport> report = reportRepository.find(id);
+    public T getById(UUID id) {
+        Optional<T> report = reportRepository.find(id);
         return report.orElseThrow(() -> new NotFoundException("Report not found"));
     }
 
-    public InspectionReport update(UUID id, InspectionReport report) {
+    public T update(UUID id, T report) {
         report.setId(id);
-        return reportRepository.update(report);
+        return reportRepository.save(report);
     }
 
 }

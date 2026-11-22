@@ -1,7 +1,6 @@
 package com.onix322.app.vehicle.resource.controller;
 
 import com.onix322.app.vehicle.resource.model.impl.Van;
-import com.onix322.app.vehicle.resource.service.VanService;
 import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -17,7 +16,7 @@ import java.util.UUID;
 @Singleton
 public class VanController {
 
-    private VehicleService<Van> vanService;
+    private VehicleService<Van> service;
 
     @POST
     @Path("/create")
@@ -26,7 +25,7 @@ public class VanController {
     public Response create(Van van) {
         try {
             return Response.status(Response.Status.CREATED)
-                    .entity(vanService.create(van))
+                    .entity(service.create(van))
                     .build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -44,7 +43,7 @@ public class VanController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
         try {
-            return Response.ok(vanService.getAll()).build();
+            return Response.ok(service.getAll()).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(e.getMessage())
@@ -58,7 +57,7 @@ public class VanController {
     public Response getById(@PathParam("id") UUID id) {
         try {
             return Response.status(Response.Status.OK)
-                    .entity(vanService.getById(id))
+                    .entity(service.getById(id))
                     .build();
         } catch (NotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
@@ -78,7 +77,7 @@ public class VanController {
     public Response update(@PathParam("id") UUID id, Van van) {
         try {
             return Response.status(Response.Status.OK)
-                    .entity(vanService.update(id, van))
+                    .entity(service.update(id, van))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -93,7 +92,7 @@ public class VanController {
     public Response delete(@PathParam("id") UUID id) {
         try {
             return Response.status(Response.Status.OK)
-                    .entity(vanService.delete(id))
+                    .entity(service.delete(id))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

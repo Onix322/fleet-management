@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @DiscriminatorValue("image_report")
 public class ImageReport extends ImageAbstract {
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "report_id", referencedColumnName = "id")
     @JsonIgnoreProperties("images")
     private ReportAbstract report;

@@ -3,8 +3,8 @@ package com.onix322.app.integration.service;
 import com.onix322.app.details.resource.model.imp.VehicleDetails;
 import com.onix322.app.image.resource.model.impl.ImageProfile;
 import com.onix322.app.vehicle.resource.model.impl.Van;
-import com.onix322.app.vehicle.resource.repository.VanRepository;
-import com.onix322.app.vehicle.resource.service.VanService;
+import com.onix322.app.vehicle.resource.repository.VehicleRepository;
+import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.ws.rs.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,13 +22,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class VanServiceTest {
 
-    private VanService vanService;
+    private VehicleService<Van> vanService;
     @Mock
-    private VanRepository vanRepository;
+    private VehicleRepository<Van> vanRepository;
 
     @BeforeEach
     public void setUp() {
-        this.vanService = new VanService(vanRepository);
+        this.vanService = new VehicleService<>(vanRepository);
     }
 
     @Test

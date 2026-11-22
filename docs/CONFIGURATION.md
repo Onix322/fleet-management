@@ -112,7 +112,7 @@ The default implementations are:
 | Contract | Default implementation | Technology |
 | --- | --- | --- |
 | `Database` | `PostgresSQL` | PostgreSQL JDBC (`PGSimpleDataSource`) |
-| `ORM` | `HibernateORM` | Hibernate ORM |
+| `ORM` | `HibernateORMImpl` | Hibernate ORM |
 
 Both are selected in `DatabaseModule`. Replacing an implementation is a framework-layer change; see [FRAMEWORK.md](FRAMEWORK.md).
 
@@ -122,8 +122,8 @@ Both are selected in `DatabaseModule`. Replacing an implementation is a framewor
 | --- | --- | --- | --- | --- |
 | General server | `server.port`, `server.base.dir`, `server.context.path`, `server.api.path` | `TomcatServer` / Jersey | No | No |
 | General database connection | `database.url`, `database.user`, `database.password` | `Database` implementation (default `PostgresSQL`) | No | No |
-| Hibernate dialect | `hibernate.dialect` | `HibernateORM` | No (the value names PostgreSQL) | Yes |
-| Hibernate behavior | `hibernate.hbm2ddl.auto`, `hibernate.show_sql`, `hibernate.format_sql` | `HibernateORM` | No | Yes |
+| Hibernate dialect | `hibernate.dialect` | `HibernateORMImpl` | No (the value names PostgreSQL) | Yes |
+| Hibernate behavior | `hibernate.hbm2ddl.auto`, `hibernate.show_sql`, `hibernate.format_sql` | `HibernateORMImpl` | No | Yes |
 
 The `database.url`, `database.user` and `database.password` keys are **general connection properties**. They are not tied to PostgreSQL: any `Database` implementation can read them and map them to its own driver. The default implementation (`PostgresSQL`) happens to interpret them as PostgreSQL JDBC settings.
 
@@ -159,11 +159,11 @@ These properties are read by the default `Database` implementation, `PostgresSQL
 
 The default value of `database.url` is a PostgreSQL JDBC URL only because `PostgresSQL` is the default implementation. When another `Database` implementation is bound, the same keys can hold a URL for that database.
 
-`HibernateORM` obtains the `DataSource` from the `Database` contract while building the `SessionFactory`; it does not read `database.url`, `database.user`, or `database.password` directly.
+`HibernateORMImpl` obtains the `DataSource` from the `Database` contract while building the `SessionFactory`; it does not read `database.url`, `database.user`, or `database.password` directly.
 
 ### 4.4 Hibernate properties
 
-These properties are read by `HibernateORM`. They configure the default `ORM` implementation. If you replace `ORM`, these keys may no longer be used.
+These properties are read by `HibernateORMImpl`. They configure the default `ORM` implementation. If you replace `ORM`, these keys may no longer be used.
 
 | Property | Type | Default | Behavior |
 | --- | --- | --- | --- |
@@ -172,9 +172,9 @@ These properties are read by `HibernateORM`. They configure the default `ORM` im
 | `hibernate.show_sql` | `Boolean` | `true` | Passed to `AvailableSettings.SHOW_SQL` |
 | `hibernate.format_sql` | `Boolean` | `true` | Passed to `AvailableSettings.FORMAT_SQL` |
 
-All `hibernate.*` properties are read from `Configuration` by `HibernateORM`, not by the `Database` implementation. The `Database` contract only supplies the `DataSource`; the dialect is supplied by the ORM.
+All `hibernate.*` properties are read from `Configuration` by `HibernateORMImpl`, not by the `Database` implementation. The `Database` contract only supplies the `DataSource`; the dialect is supplied by the ORM.
 
-With `hibernate.hbm2ddl.auto=update`, Hibernate creates or updates the schema to match the registered entities when `HibernateORM.init()` builds the `SessionFactory`.
+With `hibernate.hbm2ddl.auto=update`, Hibernate creates or updates the schema to match the registered entities when `HibernateORMImpl.init()` builds the `SessionFactory`.
 
 ### 4.5 Complete default file
 
@@ -245,13 +245,13 @@ Multiple environment-specific property files are not present; the build uses the
 
 ### Connection creation (default `Database` implementation)
 
-`PostgresSQL.getDataSource()` returns a `PGSimpleDataSource` configured with URL, user and password. `HibernateORM` obtains the `DataSource` through the `Database` contract once, while constructing the `SessionFactory`. A replacement `Database` implementation can build its own data source from the general `database.*` keys or from different keys.
+`PostgresSQL.getDataSource()` returns a `PGSimpleDataSource` configured with URL, user and password. `HibernateORMImpl` obtains the `DataSource` through the `Database` contract once, while constructing the `SessionFactory`. A replacement `Database` implementation can build its own data source from the general `database.*` keys or from different keys.
 
 ### Instance scope
 
-`ConfigurationLoader`, `ConfigurationImpl`, `PropertyParser`, `PostgresSQL` and `HibernateORM` are singletons. Property values are read from the loaded `Properties` object for the lifetime of the process.
+`ConfigurationLoader`, `ConfigurationImpl`, `PropertyParser`, `PostgresSQL` and `HibernateORMImpl` are singletons. Property values are read from the loaded `Properties` object for the lifetime of the process.
 
-`PostgresSQL` and `HibernateORM` are the default contract implementations; the singleton scope belongs to the framework wiring, not to the property keys.
+`PostgresSQL` and `HibernateORMImpl` are the default contract implementations; the singleton scope belongs to the framework wiring, not to the property keys.
 
 ---
 

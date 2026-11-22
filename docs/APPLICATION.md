@@ -30,10 +30,10 @@ The examples use `Example` as a disposable placeholder—think of it as a scratc
 
 1. **One feature, one package.** Keep related entities, services, repositories, and resources together under `com.onix322.app.<feature>`.
 2. **One Guice module per feature.** The module registers the feature's entities; services and repositories are created through just-in-time bindings.
-3. **Entities are registered through the multibinder.** The framework's `HibernateORM` consumes the resulting `Set<Class<?>>`.
+3. **Entities are registered through the multibinder.** The framework's `HibernateORMImpl` consumes the resulting `Set<Class<?>>`.
 4. **REST resources are discovered by package scan.** Jersey scans `com.onix322.app`, so no explicit resource registration is required.
 5. **Business logic belongs in services.** Repositories handle persistence; resources handle HTTP.
-6. **Depend on framework contracts.** Use `ORM`, `Database`, and `Configuration`; do not reference `HibernateORM`, `PostgresSQL`, or `TomcatServer`.
+6. **Depend on framework contracts.** Use `ORM`, `Database`, and `Configuration`; do not reference `HibernateORMImpl`, `PostgresSQL`, or `TomcatServer`.
 7. **Keep feature boundaries.** A feature should not depend on another feature's entities or repositories. Expose services when cross-feature collaboration is needed.
 8. **Use Jakarta injection annotations.** Annotate constructors with `jakarta.inject.Inject` and singletons with `jakarta.inject.Singleton`. Guice and HK2 both recognize them.
 
@@ -185,10 +185,13 @@ A concrete repository only needs `@Singleton` and a constructor Guice can call �
 
 `BaseRepository` injects `ORM` into a `protected` field, so subclasses only pass the entity type to `super(...)`. The inherited `orm` field remains available for feature-specific queries.
 
-`BaseRepository` provides `find`, `findAll`, `save`, `update`, `delete`, `count` and `exists`. Each method runs in its own transaction.
+`BaseRepository` provides `find`, `findAll`, `save`, `delete`, `count` and `exists`. Each method runs in its own transaction.
+
+During an HTTP request all repository calls share one Hibernate session, opened by `OpenSessionInViewFilter` and closed after the response is written. That is why returning an entity with lazy collections works: the collections load while Jackson serializes, inside the still-open session. Outside a request the session is opened and closed per call.
+
+Do not work around lazy loading in the mapping. Prefer `FetchType.LAZY` with `@BatchSize`, keep the default session scope, and add explicit `join fetch` queries only where a use case needs them.
 
 - `save` upserts with `merge` — inserts a new entity, updates an existing one;
-- `update` has the same semantics and upserts with `merge`;
 - custom queries use `orm.execute` or `orm.executeWithResult` directly.
 
 The recommendation is to extend `BaseRepository` for standard CRUD and to use `ORM` directly when a use case needs more control: explicit queries, locking, flush timing, batch operations, or custom session semantics. Both can be used in the same repository class — the inherited methods are ordinary `ORM` transactions, so inherited CRUD and custom `orm.execute(...)` calls coexist without conflict.
@@ -298,7 +301,7 @@ Effect on the JSON contract:
 
 To add a subtype, declare the concrete entity and register it in `@JsonSubTypes`; no other wiring is needed. If the hierarchy is persisted in a single table, the JPA mapping stays independent: `@Inheritance(SINGLE_TABLE)` plus `@DiscriminatorColumn` decides how rows are stored, while the Jackson annotations only shape the JSON.
 
-Because `BaseRepository.save` and `update` upsert through `merge`, the pattern round-trips cleanly: a body carrying an existing identifier updates that row, a new identifier inserts one.
+Because `BaseRepository.save` upserts through `merge`, the pattern round-trips cleanly: a body carrying an existing identifier updates that row, a new identifier inserts one.
 
 ### 5.7 Feature module
 
@@ -360,8 +363,9 @@ The exact response depends on the feature implementation and is documented in [A
 ### Transactions
 
 - Each `ORM` call is one transaction.
-- Put multi-step operations inside a single `execute` or `executeWithResult` callback.
-- Do not keep an `EntityManager` outside the callback.
+- During a request, the session is shared through `ORM.begin()` / `ORM.end()`, managed by `OpenSessionInViewFilter`. Do not call them from feature code.
+- Put multi-step operations that must be atomic inside a single `execute` or `executeWithResult` callback. `jakarta.transaction.Transactional` is not processed by any interceptor in this stack and has no effect.
+- Do not keep an `EntityManager` outside the callback or pass it between layers.
 
 ### Identifiers
 

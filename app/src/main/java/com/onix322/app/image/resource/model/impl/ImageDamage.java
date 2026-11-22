@@ -18,11 +18,11 @@ import lombok.EqualsAndHashCode;
 @DiscriminatorValue("image_damage")
 public class ImageDamage extends ImageAbstract {
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "details_id", referencedColumnName = "id")
     private ImageDetails details;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "damage_id", referencedColumnName = "id")
     @JsonIgnoreProperties("imageDamage")
     private DamageAbstract damage;

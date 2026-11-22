@@ -16,11 +16,11 @@ import lombok.ToString;
 @DiscriminatorValue("damage_report")
 public class DamageReport extends ReportAbstract {
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
     @JsonIgnoreProperties("damageReports")
     private VehicleAbstract vehicle;
 
-    @OneToOne(mappedBy = "report", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     private VehicleDamage damage;
 }
