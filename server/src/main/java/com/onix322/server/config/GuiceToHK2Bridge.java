@@ -12,9 +12,10 @@ import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 
 @RequiredArgsConstructor
-public class GuiceHK2Bridge implements Feature {
+public class GuiceToHK2Bridge implements Feature {
 
     private final Injector injector;
+    private final Hk2LocatorHolder locatorHolder;
 
     @Override
     public boolean configure(FeatureContext context) {
@@ -27,6 +28,9 @@ public class GuiceHK2Bridge implements Feature {
                 serviceLocator.getService(GuiceIntoHK2Bridge.class);
 
         bridge.bridgeGuiceInjector(injector);
+
+        // HK2 -> Guice: publish the Jersey locator for @HK2Inject fields.
+        locatorHolder.set(serviceLocator);
         return true;
     }
 }

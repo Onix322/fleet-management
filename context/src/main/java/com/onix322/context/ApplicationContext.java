@@ -3,7 +3,7 @@ package com.onix322.context;
 import com.google.inject.AbstractModule;
 import com.onix322.config.guice.ConfigModule;
 import com.onix322.persistence.database.guice.DatabaseModule;
-import com.onix322.server.ServerModule;
+import com.onix322.server.guice.ServerModule;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

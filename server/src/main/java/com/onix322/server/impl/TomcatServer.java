@@ -3,7 +3,8 @@ package com.onix322.server.impl;
 import com.google.inject.Injector;
 import com.onix322.config.Configuration;
 import com.onix322.server.Server;
-import com.onix322.server.config.GuiceHK2Bridge;
+import com.onix322.server.config.GuiceToHK2Bridge;
+import com.onix322.server.config.Hk2LocatorHolder;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.Filter;
@@ -27,6 +28,7 @@ public class TomcatServer implements Server {
     private final Tomcat tomcat;
     private final Configuration configuration;
     private final Injector injector;
+    private final Hk2LocatorHolder hk2LocatorHolder;
     private final Set<Filter> filters;
 
     @Override
@@ -93,7 +95,7 @@ public class TomcatServer implements Server {
         jerseyConfig.packages("com.onix322.app");
 
         // Connect Guice with HK2
-        jerseyConfig.register(new GuiceHK2Bridge(injector));
+        jerseyConfig.register(new GuiceToHK2Bridge(injector, hk2LocatorHolder));
 
         // Register Jersey Servlet
         Wrapper jerseyServlet = Tomcat.addServlet(
