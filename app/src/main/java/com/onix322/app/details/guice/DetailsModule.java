@@ -4,11 +4,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.onix322.app.details.resource.model.DetailsAbstract;
-import com.onix322.app.details.resource.model.imp.DamageDetails;
-import com.onix322.app.details.resource.model.imp.ImageDetails;
-import com.onix322.app.details.resource.model.imp.ReportDetails;
-import com.onix322.app.details.resource.model.imp.VehicleDetails;
-import com.onix322.app.report.resource.model.ReportAbstract;
+import com.onix322.app.details.resource.model.imp.dao.DamageDetails;
+import com.onix322.app.details.resource.model.imp.dao.ImageDetails;
+import com.onix322.app.details.resource.model.imp.dao.ReportDetails;
+import com.onix322.app.details.resource.model.imp.dao.VehicleDetails;
 
 public class DetailsModule extends AbstractModule {
 

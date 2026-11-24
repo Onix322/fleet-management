@@ -1,7 +1,7 @@
 package com.onix322.app.integration.controller;
 
 import com.onix322.app.report.resource.controller.InspectionReportController;
-import com.onix322.app.report.resource.model.impl.InspectionReport;
+import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
 import com.onix322.app.report.resource.service.ReportService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;

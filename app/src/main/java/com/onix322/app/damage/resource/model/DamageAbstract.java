@@ -1,22 +1,14 @@
 package com.onix322.app.damage.resource.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.onix322.app.damage.resource.model.impl.VehicleDamage;
-import com.onix322.app.details.resource.model.imp.DamageDetails;
-import com.onix322.app.details.resource.model.imp.ImageDetails;
-import com.onix322.app.details.resource.model.imp.ReportDetails;
-import com.onix322.app.details.resource.model.imp.VehicleDetails;
-import com.onix322.app.image.resource.model.impl.ImageDamage;
-import com.onix322.app.report.resource.model.impl.DamageReport;
-import com.onix322.app.vehicle.resource.model.VehicleAbstract;
+import com.onix322.app.details.resource.model.imp.dao.DamageDetails;
+import com.onix322.app.image.resource.model.impl.dao.ImageDamage;
+import com.onix322.app.report.resource.model.impl.dao.DamageReport;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Instantiator;
 
 import java.util.UUID;
 

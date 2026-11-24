@@ -2,8 +2,8 @@ package com.onix322.app.report.guice;
 
 import com.google.inject.AbstractModule;
 import com.onix322.app.report.resource.model.ReportAbstract;
-import com.onix322.app.report.resource.model.impl.DamageReport;
-import com.onix322.app.report.resource.model.impl.InspectionReport;
+import com.onix322.app.report.resource.model.impl.dao.DamageReport;
+import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
 import com.onix322.app.report.resource.repository.ReportRepository;
 import jakarta.inject.Singleton;
 import onix322.initializer.guice.InitializerModule;

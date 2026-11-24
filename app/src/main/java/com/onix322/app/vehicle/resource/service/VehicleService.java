@@ -1,11 +1,10 @@
 package com.onix322.app.vehicle.resource.service;
 
-import com.onix322.app.vehicle.resource.model.VehicleAbstract;
+import com.onix322.app.vehicle.resource.model.impl.VehicleAbstract;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.NotFoundException;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,8 +24,6 @@ public class VehicleService<T extends VehicleAbstract> {
         if (van.getDetails() == null || van.getImages().isEmpty()) {
             throw new IllegalArgumentException("Vehicle details or profile images cannot be null / empty");
         }
-        van.getDetails().setVehicle(van);
-        van.getImages().forEach(image -> image.setVehicle(van));
         return vanRepository.save(van);
     }
 
@@ -44,7 +41,17 @@ public class VehicleService<T extends VehicleAbstract> {
     }
 
     public T update(UUID id, T van) {
+        if(van == null || id == null) {
+            throw new IllegalArgumentException("Vehicle or id cannot be null");
+        }
         van.setId(id);
         return vanRepository.save(van);
+    }
+
+    public Boolean exists(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        return vanRepository.exists(id);
     }
 }

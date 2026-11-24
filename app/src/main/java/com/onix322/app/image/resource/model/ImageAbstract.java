@@ -2,11 +2,9 @@ package com.onix322.app.image.resource.model;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.onix322.app.details.resource.model.imp.ImageDetails;
-import com.onix322.app.image.resource.model.impl.ImageDamage;
-import com.onix322.app.image.resource.model.impl.ImageProfile;
-import com.onix322.app.image.resource.model.impl.ImageReport;
-import com.onix322.app.report.resource.model.impl.InspectionReport;
+import com.onix322.app.image.resource.model.impl.dao.ImageDamage;
+import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
+import com.onix322.app.image.resource.model.impl.dao.ImageReport;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +13,6 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "image")
-@DiscriminatorColumn(name = "image_type")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({

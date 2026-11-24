@@ -1,7 +1,8 @@
-package com.onix322.app.vehicle.resource.model;
+package com.onix322.app.vehicle.resource.model.impl;
 
-import com.onix322.app.vehicle.util.OwnershipType;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -11,9 +12,8 @@ import java.sql.Date;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@DiscriminatorValue("motorized")
 @ToString(callSuper = true)
-public class VehicleMotorized  extends VehicleAbstract {
+public class VehicleMotorized extends VehicleAbstract {
 
     @Column(name = "last_pti")
     private Date lastPTI; // last periodic technical inspection

@@ -1,8 +1,7 @@
-package com.onix322.app.vehicle.resource.model;
+package com.onix322.app.vehicle.resource.model.impl;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -10,7 +9,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@DiscriminatorValue("non_motorized")
 @ToString(callSuper = true)
-public class VehicleNonMotorized extends VehicleAbstract{
+public class VehicleNonMotorized extends VehicleAbstract {
 }

@@ -1,7 +1,10 @@
 package com.onix322.app.integration.controller;
 
 import com.onix322.app.vehicle.resource.controller.VanController;
-import com.onix322.app.vehicle.resource.model.impl.Van;
+import com.onix322.app.vehicle.resource.model.impl.dao.Van;
+import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
+import com.onix322.app.vehicle.resource.model.impl.dto.VanReturnDto;
+import com.onix322.app.vehicle.resource.service.VanService;
 import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
@@ -26,13 +29,16 @@ import static org.mockito.Mockito.when;
 public class VanControllerTest {
 
     @Mock
-    private VehicleService<Van> vanService;
+    private VehicleService<Van> vehicleService;
+
+    @Mock
+    private VanService vanService;
 
     private VanController vanController;
 
     @BeforeEach
     public void setUpEach() {
-        this.vanController = new VanController(this.vanService);
+        this.vanController = new VanController(vehicleService, vanService);
     }
 
     @AfterEach
@@ -43,20 +49,21 @@ public class VanControllerTest {
     @ParameterizedTest
     @MethodSource("createdScenarios")
     public void testCreatedMethodWhenException(Response.Status expectedStatus, Exception thrown) {
-        Van van = new Van();
+        VanAddDto given = new VanAddDto();
+        VanReturnDto expected = new VanReturnDto();
 
         if (thrown == null) {
-            when(this.vanService.create(van)).thenReturn(van);
+            when(this.vanService.create(given)).thenReturn(expected);
         } else {
-            when(this.vanService.create(van)).thenThrow(thrown);
+            when(this.vanService.create(given)).thenThrow(thrown);
         }
 
-        try (Response response = this.vanController.create(van)) {
+        try (Response response = this.vanController.create(given)) {
             assertEquals(expectedStatus.getStatusCode(), response.getStatus());
 
             if (thrown == null) {
                 assertNotNull(response.getEntity());
-                assertEquals(van, response.getEntity());
+                assertEquals(expected, response.getEntity());
             }
         }
     }
@@ -73,12 +80,12 @@ public class VanControllerTest {
     @MethodSource("getByIdScenarios")
     public void testGetById(Response.Status expectedStatus, Exception thrown) {
         UUID id = UUID.randomUUID();
-        Van van = null;
+        Van expected = null;
 
         if (thrown == null) {
-            van = new Van();
-            van.setId(id);
-            when(this.vanService.getById(id)).thenReturn(van);
+            expected = new Van();
+            expected.setId(id);
+            when(this.vanService.getById(id)).thenReturn(expected);
         } else {
             when(this.vanService.getById(id)).thenThrow(thrown);
         }
@@ -88,7 +95,7 @@ public class VanControllerTest {
 
         if (thrown == null) {
             assertInstanceOf(Van.class, response.getEntity());
-            assertSame(van, response.getEntity());
+            assertSame(expected, response.getEntity());
         }
     }
 
@@ -99,9 +106,9 @@ public class VanControllerTest {
         van.setId(UUID.randomUUID());
 
         if (thr == null) {
-            when(this.vanService.delete(van.getId())).thenReturn(expectedSuccess);
+            when(this.vehicleService.delete(van.getId())).thenReturn(expectedSuccess);
         } else {
-            when(this.vanService.delete(van.getId())).thenThrow(thr);
+            when(this.vehicleService.delete(van.getId())).thenThrow(thr);
         }
 
         try (Response response = this.vanController.delete(van.getId())) {

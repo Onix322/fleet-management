@@ -1,12 +1,11 @@
-package com.onix322.app.image.resource.model.impl;
+package com.onix322.app.image.resource.model.impl.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.onix322.app.damage.resource.model.DamageAbstract;
-import com.onix322.app.details.resource.model.imp.ImageDetails;
+import com.onix322.app.details.resource.model.imp.dao.ImageDetails;
 import com.onix322.app.image.resource.model.ImageAbstract;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.Data;
@@ -15,7 +14,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@DiscriminatorValue("image_damage")
 public class ImageDamage extends ImageAbstract {
 
     @OneToOne

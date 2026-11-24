@@ -1,6 +1,6 @@
 package com.onix322.app.report.resource.controller;
 
-import com.onix322.app.report.resource.model.impl.InspectionReport;
+import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
 import com.onix322.app.report.resource.service.ReportService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

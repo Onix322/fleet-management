@@ -1,8 +1,8 @@
 package com.onix322.app.integration.service;
 
-import com.onix322.app.details.resource.model.imp.VehicleDetails;
-import com.onix322.app.image.resource.model.impl.ImageProfile;
-import com.onix322.app.vehicle.resource.model.impl.Van;
+import com.onix322.app.details.resource.model.imp.dao.VehicleDetails;
+import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
+import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
 import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.ws.rs.NotFoundException;
