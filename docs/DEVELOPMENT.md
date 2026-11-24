@@ -322,7 +322,7 @@ Test sources belong in each module's `src/test/java` directory. The current suit
 | `initializer` | `TypeFactoryTest` | reflective generic repository creation and member injection |
 | `app` | `VanControllerTest` | controller status codes and response bodies with a mocked service |
 | `app` | `InspectionReportControllerTest` | controller status codes and response bodies with a mocked service |
-| `app` | `VanServiceTest` | service validation and repository delegation with a mocked repository |
+| `app` | `VehicleServiceTest` | service validation and repository delegation with a mocked repository |
 
 The `app` test packages use an `integration` name, but the tests do not start a database or an HTTP container. Add a separate integration test setup when persistence behavior against PostgreSQL must be verified.
 

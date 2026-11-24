@@ -28,9 +28,9 @@ public class VanService extends VehicleService<Van> {
         if (vanDto == null) {
             throw new IllegalArgumentException("VanDto cannot be null");
         }
-        Van van = vanMapper.toVan(vanDto);
-        Van updatedVan = super.create(van);
-        return vanMapper.toVanDto(updatedVan);
+        Van mappedVan = vanMapper.toVan(vanDto);
+        Van createdVan = super.create(mappedVan);
+        return vanMapper.toVanDto(createdVan);
     }
 
     public VanReturnDto update(UUID id, VanUpdateDto vanDto) {
@@ -44,8 +44,8 @@ public class VanService extends VehicleService<Van> {
     }
 
     public List<VanSummaryDto> getAllVans() {
-        List<Van> van = super.getAll();
-        return van.stream()
+        return super.getAll()
+                .stream()
                 .map(vanMapper::toVanSummaryDto)
                 .toList();
     }

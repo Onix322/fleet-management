@@ -1,10 +1,8 @@
 package com.onix322.app.vehicle.resource.controller;
 
-import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanUpdateDto;
 import com.onix322.app.vehicle.resource.service.VanService;
-import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.*;
@@ -17,12 +15,10 @@ import java.util.UUID;
 @Singleton
 public class VanController {
 
-    private final VehicleService<Van> service;
     private final VanService vanService;
 
     @Inject
-    public VanController(VehicleService<Van> service, VanService vanService) {
-        this.service = service;
+    public VanController(VanService vanService) {
         this.vanService = vanService;
     }
 
@@ -100,7 +96,7 @@ public class VanController {
     public Response delete(@PathParam("id") UUID id) {
         try {
             return Response.status(Response.Status.OK)
-                    .entity(service.delete(id))
+                    .entity(vanService.delete(id))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

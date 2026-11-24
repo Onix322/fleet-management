@@ -1,14 +1,10 @@
-package com.onix322.app.integration.controller;
+package com.onix322.app.integration.raport;
 
-import com.onix322.app.vehicle.resource.controller.VanController;
-import com.onix322.app.vehicle.resource.model.impl.dao.Van;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanReturnDto;
-import com.onix322.app.vehicle.resource.service.VanService;
-import com.onix322.app.vehicle.resource.service.VehicleService;
+import com.onix322.app.report.resource.controller.InspectionReportController;
+import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
+import com.onix322.app.report.resource.service.ReportService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,100 +14,100 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class VanControllerTest {
+public class InspectionReportControllerTest {
 
     @Mock
-    private VehicleService<Van> vehicleService;
+    private ReportService<InspectionReport> reportService;
 
-    @Mock
-    private VanService vanService;
-
-    private VanController vanController;
+    private InspectionReportController reportController;
 
     @BeforeEach
     public void setUpEach() {
-        this.vanController = new VanController(vehicleService, vanService);
-    }
-
-    @AfterEach
-    public void tearDownEach() {
-
+        this.reportController = new InspectionReportController(this.reportService);
     }
 
     @ParameterizedTest
-    @MethodSource("createdScenarios")
-    public void testCreatedMethodWhenException(Response.Status expectedStatus, Exception thrown) {
-        VanAddDto given = new VanAddDto();
-        VanReturnDto expected = new VanReturnDto();
+    @MethodSource("createScenarios")
+    public void testCreateMethod(Response.Status expectedStatus, Exception thrown) {
+        // Given
+        InspectionReport inspectionReport = new InspectionReport();
 
         if (thrown == null) {
-            when(this.vanService.create(given)).thenReturn(expected);
+            when(this.reportService.create(inspectionReport)).thenReturn(inspectionReport);
         } else {
-            when(this.vanService.create(given)).thenThrow(thrown);
+            when(this.reportService.create(inspectionReport)).thenThrow(thrown);
         }
 
-        try (Response response = this.vanController.create(given)) {
+        // When
+        try (Response response = this.reportController.create(inspectionReport)) {
+            // Then
             assertEquals(expectedStatus.getStatusCode(), response.getStatus());
 
             if (thrown == null) {
                 assertNotNull(response.getEntity());
-                assertEquals(expected, response.getEntity());
+                assertEquals(inspectionReport, response.getEntity());
             }
         }
     }
 
     @Test
     public void testGetAllMethod() {
-        Response response = this.vanController.getAll();
+        // When
+        Response response = this.reportController.getAll();
+
+        // Then
         assertEquals(200, response.getStatus());
         assertNotNull(response.getEntity());
-        assertInstanceOf(List.class, response.getEntity());
     }
 
     @ParameterizedTest
     @MethodSource("getByIdScenarios")
     public void testGetById(Response.Status expectedStatus, Exception thrown) {
-        UUID id = UUID.randomUUID();
-        Van expected = null;
+        // Given
+        InspectionReport inspectionReport = new InspectionReport();
+        UUID reportId = UUID.randomUUID();
 
         if (thrown == null) {
-            expected = new Van();
-            expected.setId(id);
-            when(this.vanService.getById(id)).thenReturn(expected);
+            when(this.reportService.getById(reportId)).thenReturn(inspectionReport);
         } else {
-            when(this.vanService.getById(id)).thenThrow(thrown);
+            when(this.reportService.getById(reportId)).thenThrow(thrown);
         }
 
-        Response response = this.vanController.getById(id);
+        // When
+        Response response = this.reportController.getById(reportId);
+
+        // Then
         assertEquals(expectedStatus.getStatusCode(), response.getStatus());
 
         if (thrown == null) {
-            assertInstanceOf(Van.class, response.getEntity());
-            assertSame(expected, response.getEntity());
+            assertNotNull(response.getEntity());
+            assertEquals(inspectionReport, response.getEntity());
         }
     }
 
     @ParameterizedTest
     @MethodSource("deleteScenarios")
     public void testDeleteMethod(Response.Status expectedStatus, Boolean expectedSuccess, Throwable thr) {
-        Van van = new Van();
-        van.setId(UUID.randomUUID());
+        // Given
+        UUID reportId = UUID.randomUUID();
 
         if (thr == null) {
-            when(this.vehicleService.delete(van.getId())).thenReturn(expectedSuccess);
+            when(this.reportService.delete(reportId)).thenReturn(expectedSuccess);
         } else {
-            when(this.vehicleService.delete(van.getId())).thenThrow(thr);
+            when(this.reportService.delete(reportId)).thenThrow(thr);
         }
 
-        try (Response response = this.vanController.delete(van.getId())) {
+        // When
+        try (Response response = this.reportController.delete(reportId)) {
+            // Then
             assertEquals(expectedStatus.getStatusCode(), response.getStatus());
 
             if (thr == null) {
@@ -131,15 +127,15 @@ public class VanControllerTest {
     static Stream<Arguments> getByIdScenarios() {
         return Stream.of(
                 Arguments.of(Response.Status.OK, (Exception) null),
-                Arguments.of(Response.Status.NOT_FOUND, new NotFoundException("Vehicle not found")),
+                Arguments.of(Response.Status.NOT_FOUND, new NotFoundException("Report not found")),
                 Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected database error"))
         );
     }
 
-    static Stream<Arguments> createdScenarios() {
+    static Stream<Arguments> createScenarios() {
         return Stream.of(
                 Arguments.of(Response.Status.CREATED, (Exception) null),
-                Arguments.of(Response.Status.BAD_REQUEST, new IllegalArgumentException("Invalid vehicle data")),
+                Arguments.of(Response.Status.BAD_REQUEST, new IllegalArgumentException("Invalid report data")),
                 Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected database error"))
         );
     }
