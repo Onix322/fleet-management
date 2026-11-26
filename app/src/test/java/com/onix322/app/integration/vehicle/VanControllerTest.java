@@ -5,7 +5,9 @@ import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
 import com.onix322.app.vehicle.resource.model.impl.dto.VehicleMotorizedDto;
 import com.onix322.app.vehicle.resource.service.VanService;
-import jakarta.ws.rs.NotFoundException;
+import com.onix322.http.exception.client.BadRequestException;
+import com.onix322.http.exception.client.NotFoundException;
+import com.onix322.http.exception.server.InternalServerErrorException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,20 +50,18 @@ public class VanControllerTest {
         VanAddDto given = new VanAddDto();
         VehicleMotorizedDto expected = VehicleMotorizedDto.builder().build();
 
-        if (thrown == null) {
-            when(this.vanService.create(given)).thenReturn(expected);
-        } else {
+        if (thrown != null) {
             when(this.vanService.create(given)).thenThrow(thrown);
+            assertThrows(thrown.getClass(), () -> this.vanController.create(given));
+            return;
         }
 
-        try (Response response = this.vanController.create(given)) {
-            assertEquals(expectedStatus.getStatusCode(), response.getStatus());
+        when(this.vanService.create(given)).thenReturn(expected);
+        Response response = this.vanController.create(given);
+        assertEquals(expectedStatus.getStatusCode(), response.getStatus());
 
-            if (thrown == null) {
-                assertNotNull(response.getEntity());
-                assertEquals(expected, response.getEntity());
-            }
-        }
+        assertNotNull(response.getEntity());
+        assertEquals(expected, response.getEntity());
     }
 
     @Test
@@ -76,51 +76,50 @@ public class VanControllerTest {
     @MethodSource("getByIdScenarios")
     public void testGetById(Response.Status expectedStatus, Exception thrown) {
         UUID id = UUID.randomUUID();
-        Van expected = null;
 
-        if (thrown == null) {
-            expected = new Van();
-            expected.setId(id);
-            when(this.vanService.getById(id)).thenReturn(expected);
-        } else {
+        if (thrown != null) {
             when(this.vanService.getById(id)).thenThrow(thrown);
+            assertThrows(thrown.getClass(), () -> this.vanController.getById(id));
+            return;
         }
+
+        Van expected = new Van();
+        expected.setId(id);
+        when(this.vanService.getById(id)).thenReturn(expected);
 
         Response response = this.vanController.getById(id);
         assertEquals(expectedStatus.getStatusCode(), response.getStatus());
 
-        if (thrown == null) {
-            assertInstanceOf(Van.class, response.getEntity());
-            assertSame(expected, response.getEntity());
-        }
+        assertInstanceOf(Van.class, response.getEntity());
+        assertSame(expected, response.getEntity());
     }
 
     @ParameterizedTest
     @MethodSource("deleteScenarios")
-    public void testDeleteMethod(Response.Status expectedStatus, Boolean expectedSuccess, Throwable thr) {
+    public void testDeleteMethod(Response.Status expectedStatus, Boolean expectedSuccess, Exception thr) {
         Van van = new Van();
-        van.setId(UUID.randomUUID());
 
-        if (thr == null) {
-            when(this.vanService.delete(van.getId())).thenReturn(expectedSuccess);
-        } else {
+        if (thr != null) {
             when(this.vanService.delete(van.getId())).thenThrow(thr);
+            assertThrows(thr.getClass(), () -> this.vanController.delete(null));
+            return;
         }
 
-        try (Response response = this.vanController.delete(van.getId())) {
-            assertEquals(expectedStatus.getStatusCode(), response.getStatus());
+        van.setId(UUID.randomUUID());
+        when(this.vanService.delete(van.getId())).thenReturn(expectedSuccess);
 
-            if (thr == null) {
-                assertNotNull(response.getEntity());
-                assertEquals(true, response.getEntity());
-            }
-        }
+        Response response = this.vanController.delete(van.getId());
+        assertEquals(expectedStatus.getStatusCode(), response.getStatus());
+
+        assertNotNull(response.getEntity());
+        assertEquals(expectedSuccess, response.getEntity());
     }
 
     static Stream<Arguments> deleteScenarios() {
         return Stream.of(
                 Arguments.of(Response.Status.OK, Boolean.TRUE, null),
-                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, Boolean.FALSE, new RuntimeException("Unexpected database error"))
+                Arguments.of(Response.Status.OK, Boolean.FALSE, null),
+                Arguments.of(Response.Status.BAD_REQUEST, null, new BadRequestException("Unexpected database error"))
         );
     }
 
@@ -128,15 +127,15 @@ public class VanControllerTest {
         return Stream.of(
                 Arguments.of(Response.Status.OK, (Exception) null),
                 Arguments.of(Response.Status.NOT_FOUND, new NotFoundException("Vehicle not found")),
-                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected database error"))
+                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new InternalServerErrorException("Unexpected database error"))
         );
     }
 
     static Stream<Arguments> createdScenarios() {
         return Stream.of(
                 Arguments.of(Response.Status.CREATED, (Exception) null),
-                Arguments.of(Response.Status.BAD_REQUEST, new IllegalArgumentException("Invalid vehicle data")),
-                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected database error"))
+                Arguments.of(Response.Status.BAD_REQUEST, new BadRequestException("Invalid vehicle data")),
+                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new InternalServerErrorException("Unexpected database error"))
         );
     }
 }

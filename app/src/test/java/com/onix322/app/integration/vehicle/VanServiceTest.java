@@ -10,6 +10,7 @@ import com.onix322.app.vehicle.resource.model.impl.dto.VehicleMotorizedDto;
 import com.onix322.app.vehicle.resource.model.impl.mapper.VehicleMapper;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
 import com.onix322.app.vehicle.resource.service.VanService;
+import com.onix322.http.exception.client.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +72,7 @@ public class VanServiceTest {
 
     @Test
     public void testCreateWhenThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> vanService.create((VanAddDto) null));
+        assertThrows(BadRequestException.class, () -> vanService.create((VanAddDto) null));
         verify(vanMapper, never()).toVan((VanAddDto) null);
         verify(vanRepository, never()).save((Van) null);
         verify(vanMapper, never()).toVehicleMotorizedDto((Van) null);
@@ -101,7 +102,7 @@ public class VanServiceTest {
 
     @Test
     public void testUpdateWhenThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> vanService.update((UUID) null, (Van) null));
+        assertThrows(BadRequestException.class, () -> vanService.update((UUID) null, (Van) null));
         verify(vanMapper, never()).updateVan(null, (Van) null);
         verify(vanRepository, never()).save((Van) null);
         verify(vanMapper, never()).toVehicleMotorizedDto((Van) null);

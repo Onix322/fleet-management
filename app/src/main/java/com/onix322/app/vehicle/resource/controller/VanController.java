@@ -27,51 +27,25 @@ public class VanController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(VanAddDto van) {
-        try {
-            return Response.status(Response.Status.CREATED)
-                    .entity(vanService.create(van))
-                    .build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(e.getMessage())
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-        }
+        return Response.status(Response.Status.CREATED)
+                .entity(vanService.create(van))
+                .build();
     }
 
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
-        try {
-            return Response.ok(vanService.getAllVans()).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-        }
+        return Response.ok(vanService.getAllVans())
+                .build();
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@PathParam("id") UUID id) {
-        try {
-            return Response.status(Response.Status.OK)
-                    .entity(vanService.getById(id))
-                    .build();
-        } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(e.getMessage())
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-        }
+        return Response.ok(vanService.getById(id))
+                .build();
     }
 
     @PUT
@@ -79,29 +53,16 @@ public class VanController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") UUID id, VanUpdateDto van) {
-        try {
-            return Response.status(Response.Status.OK)
-                    .entity(vanService.update(id, van))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-        }
+        return Response.ok(vanService.update(id, van))
+                .build();
     }
 
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response delete(@PathParam("id") UUID id) {
-        try {
-            return Response.status(Response.Status.OK)
-                    .entity(vanService.delete(id))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(e.getMessage())
-                    .build();
-        }
+        return Response.ok(vanService.delete(id))
+                .build();
+
     }
 }
