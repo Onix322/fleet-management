@@ -1,10 +1,9 @@
-package com.onix322.app.details.resource.model.imp;
+package com.onix322.app.details.resource.model.imp.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.onix322.app.details.resource.model.DetailsAbstract;
 import com.onix322.app.report.resource.model.ReportAbstract;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@DiscriminatorValue("report_details")
 public class ReportDetails extends DetailsAbstract {
     @Column(name = "title", nullable = false)
     private String title;

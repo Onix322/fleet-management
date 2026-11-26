@@ -1,12 +1,10 @@
 package com.onix322.app.image.guice;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
-import com.google.inject.multibindings.Multibinder;
 import com.onix322.app.image.resource.model.ImageAbstract;
-import com.onix322.app.image.resource.model.impl.ImageDamage;
-import com.onix322.app.image.resource.model.impl.ImageProfile;
-import com.onix322.app.image.resource.model.impl.ImageReport;
+import com.onix322.app.image.resource.model.impl.dao.ImageDamage;
+import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
+import com.onix322.app.image.resource.model.impl.dao.ImageReport;
 import com.onix322.app.image.resource.repository.ImageRepository;
 import jakarta.inject.Singleton;
 import onix322.initializer.guice.InitializerModule;

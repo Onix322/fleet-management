@@ -1,8 +1,8 @@
-package com.onix322.app.integration.service;
+package com.onix322.app.integration.vehicle;
 
-import com.onix322.app.details.resource.model.imp.VehicleDetails;
-import com.onix322.app.image.resource.model.impl.ImageProfile;
-import com.onix322.app.vehicle.resource.model.impl.Van;
+import com.onix322.app.details.resource.model.imp.dao.VehicleDetails;
+import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
+import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
 import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.ws.rs.NotFoundException;
@@ -20,15 +20,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VanServiceTest {
+public class VehicleServiceTest {
 
-    private VehicleService<Van> vanService;
+    private VehicleService<Van> vehicleService;
     @Mock
     private VehicleRepository<Van> vanRepository;
 
     @BeforeEach
     public void setUp() {
-        this.vanService = new VehicleService<>(vanRepository);
+        this.vehicleService = new VehicleService<>(vanRepository);
     }
 
     @Test
@@ -50,11 +50,11 @@ public class VanServiceTest {
         when(vanRepository.save(van)).thenReturn(van);
 
         // WHEN
-        Van actual = vanService.create(van);
+        Van actual = vehicleService.create(van);
 
         // THEN
         assertNotNull(actual);
-        assertDoesNotThrow(() -> vanService.create(van));
+        assertDoesNotThrow(() -> vehicleService.create(van));
         assertEquals(van, actual);
         verify(vanRepository, atLeastOnce()).save(van);
     }
@@ -78,7 +78,7 @@ public class VanServiceTest {
         when(vanRepository.save(van)).thenThrow(new IllegalArgumentException("Vehicle not found"));
 
         // WHEN / THEN
-        assertThrows(IllegalArgumentException.class, () -> vanService.create(van));
+        assertThrows(IllegalArgumentException.class, () -> vehicleService.create(van));
         verify(vanRepository).save(van);
     }
 
@@ -91,7 +91,7 @@ public class VanServiceTest {
         when(vanRepository.findAll()).thenReturn(vans);
 
         // WHEN
-        List<Van> actual = vanService.getAll();
+        List<Van> actual = vehicleService.getAll();
 
         // THEN
         assertEquals(vans, actual);
@@ -107,7 +107,7 @@ public class VanServiceTest {
         when(vanRepository.findAll()).thenReturn(vans);
 
         // WHEN
-        List<Van> actual = vanService.getAll();
+        List<Van> actual = vehicleService.getAll();
 
         // THEN
         assertEquals(vans, actual);
@@ -126,7 +126,7 @@ public class VanServiceTest {
         when(vanRepository.find(id)).thenReturn(expected);
 
         // WHEN
-        Van actual = vanService.getById(id);
+        Van actual = vehicleService.getById(id);
 
         // THEN
         assertEquals(van, actual);
@@ -142,7 +142,7 @@ public class VanServiceTest {
         when(vanRepository.find(id)).thenThrow(new NotFoundException("Vehicle not found"));
 
         // WHEN / THEN
-        assertThrows(NotFoundException.class, () -> vanService.getById(id));
+        assertThrows(NotFoundException.class, () -> vehicleService.getById(id));
         verify(vanRepository).find(id);
     }
 
@@ -155,7 +155,7 @@ public class VanServiceTest {
         when(vanRepository.delete(givenId)).thenReturn(Boolean.TRUE);
 
         // WHEN
-        Boolean actual = vanService.delete(givenId);
+        Boolean actual = vehicleService.delete(givenId);
 
         // THEN
         assertEquals(Boolean.TRUE, actual);
@@ -171,7 +171,7 @@ public class VanServiceTest {
         when(vanRepository.delete(givenId)).thenReturn(Boolean.FALSE);
 
         // WHEN
-        Boolean actual = vanService.delete(givenId);
+        Boolean actual = vehicleService.delete(givenId);
 
         // THEN
         assertEquals(Boolean.FALSE, actual);
@@ -185,7 +185,7 @@ public class VanServiceTest {
         when(vanRepository.delete(null)).thenThrow(new IllegalArgumentException("Van id cannot be null"));
 
         // WHEN / THEN
-        assertThrows(IllegalArgumentException.class, () -> vanService.delete(null));
+        assertThrows(IllegalArgumentException.class, () -> vehicleService.delete(null));
         verify(vanRepository).delete(null);
     }
 
@@ -198,7 +198,7 @@ public class VanServiceTest {
         when(vanRepository.delete(givenId)).thenThrow(new RuntimeException("Internal server error"));
 
         // WHEN / THEN
-        assertThrows(RuntimeException.class, () -> vanService.delete(givenId));
+        assertThrows(RuntimeException.class, () -> vehicleService.delete(givenId));
         verify(vanRepository).delete(givenId);
     }
 }

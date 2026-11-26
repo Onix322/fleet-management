@@ -2,7 +2,6 @@ package com.onix322.app.report.resource.service;
 
 
 import com.onix322.app.report.resource.model.ReportAbstract;
-import com.onix322.app.report.resource.model.impl.InspectionReport;
 import com.onix322.app.report.resource.repository.ReportRepository;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;

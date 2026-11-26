@@ -1,11 +1,13 @@
-package com.onix322.app.vehicle.resource.model;
+package com.onix322.app.vehicle.resource.model.impl;
 
 import com.fasterxml.jackson.annotation.*;
-import com.onix322.app.details.resource.model.imp.VehicleDetails;
-import com.onix322.app.image.resource.model.impl.ImageProfile;
-import com.onix322.app.report.resource.model.impl.DamageReport;
-import com.onix322.app.report.resource.model.impl.InspectionReport;
-import com.onix322.app.vehicle.resource.model.impl.Van;
+import com.onix322.app.details.resource.model.imp.dao.VehicleDetails;
+import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
+import com.onix322.app.report.resource.model.impl.dao.DamageReport;
+import com.onix322.app.report.resource.model.impl.dao.ReportInspection;
+import com.onix322.app.vehicle.resource.model.Vehicle;
+import com.onix322.app.vehicle.resource.model.impl.dao.Van;
+import com.onix322.app.vehicle.util.OperationalStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.BatchSize;
@@ -17,8 +19,7 @@ import java.util.UUID;
 @Table(name = "vehicle")
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@DiscriminatorColumn(name = "vehicle_type")
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "vehicle_type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Van.class, name = "van"),
 })
@@ -26,6 +27,10 @@ public abstract class VehicleAbstract implements Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operational_status", nullable = false)
+    private OperationalStatus operationalStatus;
 
     @OneToOne(
             mappedBy = "vehicle",
@@ -52,7 +57,7 @@ public abstract class VehicleAbstract implements Vehicle {
     )
     @JsonIgnoreProperties("vehicle")
     @BatchSize(size = 10)
-    private List<InspectionReport> inspectionReports;
+    private List<ReportInspection> reportInspections;
 
     @OneToMany(
             mappedBy = "vehicle",

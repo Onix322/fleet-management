@@ -1,6 +1,7 @@
 package com.onix322.app.report.resource.controller;
 
-import com.onix322.app.report.resource.model.impl.InspectionReport;
+import com.onix322.app.report.resource.model.impl.dao.ReportInspection;
+import com.onix322.app.report.resource.service.InspectionReportService;
 import com.onix322.app.report.resource.service.ReportService;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -16,13 +17,13 @@ import java.util.UUID;
 @Singleton
 public class InspectionReportController {
 
-    private ReportService<InspectionReport> inspectionReportService;
+    private InspectionReportService inspectionReportService;
 
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(InspectionReport report) {
+    public Response create(ReportInspection report) {
         try {
             return Response.status(Response.Status.CREATED)
                     .entity(inspectionReportService.create(report))
@@ -73,7 +74,7 @@ public class InspectionReportController {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") UUID id, InspectionReport report) {
+    public Response update(@PathParam("id") UUID id, ReportInspection report) {
         try {
             return Response.status(Response.Status.OK)
                     .entity(inspectionReportService.update(id, report))

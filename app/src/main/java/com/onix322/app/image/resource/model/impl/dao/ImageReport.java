@@ -1,4 +1,4 @@
-package com.onix322.app.image.resource.model.impl;
+package com.onix322.app.image.resource.model.impl.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.onix322.app.image.resource.model.ImageAbstract;
@@ -10,7 +10,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@DiscriminatorValue("image_report")
 public class ImageReport extends ImageAbstract {
 
     @ManyToOne
