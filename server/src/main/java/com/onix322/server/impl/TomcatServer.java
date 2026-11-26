@@ -8,6 +8,7 @@ import com.onix322.server.config.Hk2LocatorHolder;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.Filter;
+import jakarta.ws.rs.core.Feature;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
@@ -30,6 +31,7 @@ public class TomcatServer implements Server {
     private final Injector injector;
     private final Hk2LocatorHolder hk2LocatorHolder;
     private final Set<Filter> filters;
+    private final Set<Feature> features;
 
     @Override
     public void start() {
@@ -96,6 +98,7 @@ public class TomcatServer implements Server {
 
         // Connect Guice with HK2
         jerseyConfig.register(new GuiceToHK2Bridge(injector, hk2LocatorHolder));
+        features.forEach(jerseyConfig::register);
 
         // Register Jersey Servlet
         Wrapper jerseyServlet = Tomcat.addServlet(

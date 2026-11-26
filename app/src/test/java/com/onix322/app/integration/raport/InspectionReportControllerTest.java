@@ -3,7 +3,9 @@ package com.onix322.app.integration.raport;
 import com.onix322.app.report.resource.controller.InspectionReportController;
 import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
 import com.onix322.app.report.resource.service.ReportService;
-import jakarta.ws.rs.NotFoundException;
+import com.onix322.http.exception.client.NotFoundException;
+import com.onix322.http.exception.server.InternalServerErrorException;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,22 +41,20 @@ public class InspectionReportControllerTest {
         // Given
         InspectionReport inspectionReport = new InspectionReport();
 
-        if (thrown == null) {
-            when(this.reportService.create(inspectionReport)).thenReturn(inspectionReport);
-        } else {
+        if (thrown != null) {
             when(this.reportService.create(inspectionReport)).thenThrow(thrown);
+            assertThrows(Exception.class, () -> this.reportController.create(inspectionReport));
+            return;
         }
 
         // When
-        try (Response response = this.reportController.create(inspectionReport)) {
-            // Then
-            assertEquals(expectedStatus.getStatusCode(), response.getStatus());
+        when(this.reportService.create(inspectionReport)).thenReturn(inspectionReport);
+        Response response = this.reportController.create(inspectionReport);
+        // Then
+        assertEquals(expectedStatus.getStatusCode(), response.getStatus());
+        assertNotNull(response.getEntity());
+        assertEquals(inspectionReport, response.getEntity());
 
-            if (thrown == null) {
-                assertNotNull(response.getEntity());
-                assertEquals(inspectionReport, response.getEntity());
-            }
-        }
     }
 
     @Test
@@ -75,22 +74,20 @@ public class InspectionReportControllerTest {
         InspectionReport inspectionReport = new InspectionReport();
         UUID reportId = UUID.randomUUID();
 
-        if (thrown == null) {
-            when(this.reportService.getById(reportId)).thenReturn(inspectionReport);
-        } else {
+        if (thrown != null) {
             when(this.reportService.getById(reportId)).thenThrow(thrown);
+            assertThrows(thrown.getClass(), () -> this.reportController.getById(reportId));
+            return;
         }
 
         // When
-        Response response = this.reportController.getById(reportId);
+        when(this.reportService.getById(reportId)).thenReturn(inspectionReport);
 
         // Then
+        Response response = this.reportController.getById(reportId);
         assertEquals(expectedStatus.getStatusCode(), response.getStatus());
-
-        if (thrown == null) {
-            assertNotNull(response.getEntity());
-            assertEquals(inspectionReport, response.getEntity());
-        }
+        assertNotNull(response.getEntity());
+        assertEquals(inspectionReport, response.getEntity());
     }
 
     @ParameterizedTest
@@ -99,28 +96,27 @@ public class InspectionReportControllerTest {
         // Given
         UUID reportId = UUID.randomUUID();
 
-        if (thr == null) {
-            when(this.reportService.delete(reportId)).thenReturn(expectedSuccess);
-        } else {
+        if(thr != null) {
             when(this.reportService.delete(reportId)).thenThrow(thr);
+            assertThrows(thr.getClass(), () -> this.reportController.delete(reportId));
+            return;
         }
+
+        when(this.reportService.delete(reportId)).thenReturn(expectedSuccess);
 
         // When
         try (Response response = this.reportController.delete(reportId)) {
             // Then
             assertEquals(expectedStatus.getStatusCode(), response.getStatus());
-
-            if (thr == null) {
-                assertNotNull(response.getEntity());
-                assertEquals(true, response.getEntity());
-            }
+            assertNotNull(response.getEntity());
+            assertEquals(true, response.getEntity());
         }
     }
 
     static Stream<Arguments> deleteScenarios() {
         return Stream.of(
                 Arguments.of(Response.Status.OK, Boolean.TRUE, null),
-                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, Boolean.FALSE, new RuntimeException("Unexpected database error"))
+                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, Boolean.FALSE, new InternalServerErrorException("Unexpected database error"))
         );
     }
 
@@ -128,15 +124,15 @@ public class InspectionReportControllerTest {
         return Stream.of(
                 Arguments.of(Response.Status.OK, (Exception) null),
                 Arguments.of(Response.Status.NOT_FOUND, new NotFoundException("Report not found")),
-                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected database error"))
+                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new InternalServerErrorException("Unexpected database error"))
         );
     }
 
     static Stream<Arguments> createScenarios() {
         return Stream.of(
                 Arguments.of(Response.Status.CREATED, (Exception) null),
-                Arguments.of(Response.Status.BAD_REQUEST, new IllegalArgumentException("Invalid report data")),
-                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected database error"))
+                Arguments.of(Response.Status.BAD_REQUEST, new BadRequestException("Invalid report data")),
+                Arguments.of(Response.Status.INTERNAL_SERVER_ERROR, new InternalServerErrorException("Unexpected database error"))
         );
     }
 }

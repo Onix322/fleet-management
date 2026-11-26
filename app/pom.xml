@@ -29,5 +29,9 @@
             <groupId>com.onix322</groupId>
             <artifactId>initializer</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.onix322</groupId>
+            <artifactId>http-exceptions</artifactId>
+        </dependency>
     </dependencies>
 </project>

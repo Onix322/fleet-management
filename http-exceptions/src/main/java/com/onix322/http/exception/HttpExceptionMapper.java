@@ -1,6 +1,5 @@
 package com.onix322.http.exception;
 
-import com.google.inject.Provides;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;

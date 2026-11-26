@@ -7,6 +7,7 @@ import com.onix322.app.vehicle.resource.model.impl.dto.VanSummaryDto;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanUpdateDto;
 import com.onix322.app.vehicle.resource.model.impl.mapper.VanMapper;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
+import com.onix322.http.exception.client.BadRequestException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
@@ -26,7 +27,7 @@ public class VanService extends VehicleService<Van> {
 
     public VanReturnDto create(VanAddDto vanDto) {
         if (vanDto == null) {
-            throw new IllegalArgumentException("VanDto cannot be null");
+            throw new BadRequestException("VanDto cannot be null");
         }
         Van mappedVan = vanMapper.toVan(vanDto);
         Van createdVan = super.create(mappedVan);
@@ -35,7 +36,7 @@ public class VanService extends VehicleService<Van> {
 
     public VanReturnDto update(UUID id, VanUpdateDto vanDto) {
         if (vanDto == null || id == null) {
-            throw new IllegalArgumentException("VanDto must not be null and must have an id");
+            throw new BadRequestException("VanDto must not be null and must have an id");
         }
         Van van = super.getById(id);
         Van updateVan = vanMapper.updateVan(vanDto, van);

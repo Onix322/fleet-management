@@ -5,7 +5,9 @@ import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
 import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
 import com.onix322.app.vehicle.resource.service.VehicleService;
-import jakarta.ws.rs.NotFoundException;
+import com.onix322.http.exception.client.BadRequestException;
+import com.onix322.http.exception.client.NotFoundException;
+import com.onix322.http.exception.server.InternalServerErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,10 +77,10 @@ public class VehicleServiceTest {
         van.setImages(images);
         van.setDetails(details);
 
-        when(vanRepository.save(van)).thenThrow(new IllegalArgumentException("Vehicle not found"));
+        when(vanRepository.save(van)).thenThrow(new BadRequestException("Vehicle not found"));
 
         // WHEN / THEN
-        assertThrows(IllegalArgumentException.class, () -> vehicleService.create(van));
+        assertThrows(BadRequestException.class, () -> vehicleService.create(van));
         verify(vanRepository).save(van);
     }
 
@@ -180,13 +182,8 @@ public class VehicleServiceTest {
 
     @Test
     public void testDeleteMethodWithNullId() {
-
-        // GIVEN
-        when(vanRepository.delete(null)).thenThrow(new IllegalArgumentException("Van id cannot be null"));
-
-        // WHEN / THEN
-        assertThrows(IllegalArgumentException.class, () -> vehicleService.delete(null));
-        verify(vanRepository).delete(null);
+        assertThrows(BadRequestException.class, () -> vehicleService.delete(null));
+        verify(vanRepository, never()).delete(null);
     }
 
     @Test
@@ -195,10 +192,10 @@ public class VehicleServiceTest {
         // GIVEN
         UUID givenId = UUID.randomUUID();
 
-        when(vanRepository.delete(givenId)).thenThrow(new RuntimeException("Internal server error"));
+        when(vanRepository.delete(givenId)).thenThrow(new InternalServerErrorException("Internal server error"));
 
         // WHEN / THEN
-        assertThrows(RuntimeException.class, () -> vehicleService.delete(givenId));
+        assertThrows(InternalServerErrorException.class, () -> vehicleService.delete(givenId));
         verify(vanRepository).delete(givenId);
     }
 }
