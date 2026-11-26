@@ -1,26 +1,27 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import com.onix322.http.exception.ExtendedStatus;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Misdirected Request exception.
+ * Status 421 Misdirected Request exception.
  */
 public class MisdirectedRequestException extends HttpException {
 
     public MisdirectedRequestException() {
-        super(HttpStatusCode.MISDIRECTED_REQUEST);
+        super(ExtendedStatus.MISDIRECTED_REQUEST);
     }
 
     public MisdirectedRequestException(String message) {
-        super(HttpStatusCode.MISDIRECTED_REQUEST, message);
+        super(ExtendedStatus.MISDIRECTED_REQUEST, message);
     }
 
     public MisdirectedRequestException(String message, Throwable cause) {
-        super(HttpStatusCode.MISDIRECTED_REQUEST, message, cause);
+        super(ExtendedStatus.MISDIRECTED_REQUEST, message, cause);
     }
 
     public MisdirectedRequestException(Throwable cause) {
-        super(HttpStatusCode.MISDIRECTED_REQUEST, cause);
+        super(ExtendedStatus.MISDIRECTED_REQUEST, cause);
     }
 }

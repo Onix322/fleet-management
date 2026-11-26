@@ -1,26 +1,27 @@
 package com.onix322.http.exception.webdav;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import com.onix322.http.exception.ExtendedStatus;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Loop Detected exception.
+ * Status 508 Loop Detected exception.
  */
 public class LoopDetectedException extends HttpException {
 
     public LoopDetectedException() {
-        super(HttpStatusCode.LOOP_DETECTED);
+        super(ExtendedStatus.LOOP_DETECTED);
     }
 
     public LoopDetectedException(String message) {
-        super(HttpStatusCode.LOOP_DETECTED, message);
+        super(ExtendedStatus.LOOP_DETECTED, message);
     }
 
     public LoopDetectedException(String message, Throwable cause) {
-        super(HttpStatusCode.LOOP_DETECTED, message, cause);
+        super(ExtendedStatus.LOOP_DETECTED, message, cause);
     }
 
     public LoopDetectedException(Throwable cause) {
-        super(HttpStatusCode.LOOP_DETECTED, cause);
+        super(ExtendedStatus.LOOP_DETECTED, cause);
     }
 }

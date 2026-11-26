@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Range Not Satisfiable exception.
+ * Status 416 Range Not Satisfiable exception.
  */
 public class RangeNotSatisfiableException extends HttpException {
 
     public RangeNotSatisfiableException() {
-        super(HttpStatusCode.RANGE_NOT_SATISFIABLE);
+        super(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     public RangeNotSatisfiableException(String message) {
-        super(HttpStatusCode.RANGE_NOT_SATISFIABLE, message);
+        super(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, message);
     }
 
     public RangeNotSatisfiableException(String message, Throwable cause) {
-        super(HttpStatusCode.RANGE_NOT_SATISFIABLE, message, cause);
+        super(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, message, cause);
     }
 
     public RangeNotSatisfiableException(Throwable cause) {
-        super(HttpStatusCode.RANGE_NOT_SATISFIABLE, cause);
+        super(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, cause);
     }
 }

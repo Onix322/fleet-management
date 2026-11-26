@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Payment Required exception.
+ * Status 402 Payment Required exception.
  */
 public class PaymentRequiredException extends HttpException {
 
     public PaymentRequiredException() {
-        super(HttpStatusCode.PAYMENT_REQUIRED);
+        super(Response.Status.PAYMENT_REQUIRED);
     }
 
     public PaymentRequiredException(String message) {
-        super(HttpStatusCode.PAYMENT_REQUIRED, message);
+        super(Response.Status.PAYMENT_REQUIRED, message);
     }
 
     public PaymentRequiredException(String message, Throwable cause) {
-        super(HttpStatusCode.PAYMENT_REQUIRED, message, cause);
+        super(Response.Status.PAYMENT_REQUIRED, message, cause);
     }
 
     public PaymentRequiredException(Throwable cause) {
-        super(HttpStatusCode.PAYMENT_REQUIRED, cause);
+        super(Response.Status.PAYMENT_REQUIRED, cause);
     }
 }

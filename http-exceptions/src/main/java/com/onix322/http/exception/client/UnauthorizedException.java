@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Unauthorized exception.
+ * Status 401 Unauthorized exception.
  */
 public class UnauthorizedException extends HttpException {
 
     public UnauthorizedException() {
-        super(HttpStatusCode.UNAUTHORIZED);
+        super(Response.Status.UNAUTHORIZED);
     }
 
     public UnauthorizedException(String message) {
-        super(HttpStatusCode.UNAUTHORIZED, message);
+        super(Response.Status.UNAUTHORIZED, message);
     }
 
     public UnauthorizedException(String message, Throwable cause) {
-        super(HttpStatusCode.UNAUTHORIZED, message, cause);
+        super(Response.Status.UNAUTHORIZED, message, cause);
     }
 
     public UnauthorizedException(Throwable cause) {
-        super(HttpStatusCode.UNAUTHORIZED, cause);
+        super(Response.Status.UNAUTHORIZED, cause);
     }
 }

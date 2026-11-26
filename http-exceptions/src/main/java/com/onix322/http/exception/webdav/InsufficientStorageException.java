@@ -1,26 +1,27 @@
 package com.onix322.http.exception.webdav;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import com.onix322.http.exception.ExtendedStatus;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Insufficient Storage exception.
+ * Status 507 Insufficient Storage exception.
  */
 public class InsufficientStorageException extends HttpException {
 
     public InsufficientStorageException() {
-        super(HttpStatusCode.INSUFFICIENT_STORAGE);
+        super(ExtendedStatus.INSUFFICIENT_STORAGE);
     }
 
     public InsufficientStorageException(String message) {
-        super(HttpStatusCode.INSUFFICIENT_STORAGE, message);
+        super(ExtendedStatus.INSUFFICIENT_STORAGE, message);
     }
 
     public InsufficientStorageException(String message, Throwable cause) {
-        super(HttpStatusCode.INSUFFICIENT_STORAGE, message, cause);
+        super(ExtendedStatus.INSUFFICIENT_STORAGE, message, cause);
     }
 
     public InsufficientStorageException(Throwable cause) {
-        super(HttpStatusCode.INSUFFICIENT_STORAGE, cause);
+        super(ExtendedStatus.INSUFFICIENT_STORAGE, cause);
     }
 }

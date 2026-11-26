@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Request Timeout exception.
+ * Status 408 Request Timeout exception.
  */
 public class RequestTimeoutException extends HttpException {
 
     public RequestTimeoutException() {
-        super(HttpStatusCode.REQUEST_TIMEOUT);
+        super(Response.Status.REQUEST_TIMEOUT);
     }
 
     public RequestTimeoutException(String message) {
-        super(HttpStatusCode.REQUEST_TIMEOUT, message);
+        super(Response.Status.REQUEST_TIMEOUT, message);
     }
 
     public RequestTimeoutException(String message, Throwable cause) {
-        super(HttpStatusCode.REQUEST_TIMEOUT, message, cause);
+        super(Response.Status.REQUEST_TIMEOUT, message, cause);
     }
 
     public RequestTimeoutException(Throwable cause) {
-        super(HttpStatusCode.REQUEST_TIMEOUT, cause);
+        super(Response.Status.REQUEST_TIMEOUT, cause);
     }
 }

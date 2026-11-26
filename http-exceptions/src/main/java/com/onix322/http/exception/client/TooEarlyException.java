@@ -1,26 +1,27 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import com.onix322.http.exception.ExtendedStatus;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Too Early exception.
+ * Status 425 Too Early exception.
  */
 public class TooEarlyException extends HttpException {
 
     public TooEarlyException() {
-        super(HttpStatusCode.TOO_EARLY);
+        super(ExtendedStatus.TOO_EARLY);
     }
 
     public TooEarlyException(String message) {
-        super(HttpStatusCode.TOO_EARLY, message);
+        super(ExtendedStatus.TOO_EARLY, message);
     }
 
     public TooEarlyException(String message, Throwable cause) {
-        super(HttpStatusCode.TOO_EARLY, message, cause);
+        super(ExtendedStatus.TOO_EARLY, message, cause);
     }
 
     public TooEarlyException(Throwable cause) {
-        super(HttpStatusCode.TOO_EARLY, cause);
+        super(ExtendedStatus.TOO_EARLY, cause);
     }
 }

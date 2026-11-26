@@ -21,7 +21,7 @@ The framework is a set of Maven modules that provide technical capabilities to t
 | `server` | Embedded Tomcat, Jersey servlet, Guice/HK2 bridges |
 | `launcher` | Composition root and application entry point |
 | `initializer` | Support module for entity registration and generic repository bindings |
-| `http-exceptions` | Runtime exception hierarchy for HTTP/WebDAV error status codes |
+| `http-exceptions` | HTTP/WebDAV error exceptions and JAX-RS `ExceptionMapper` |
 
 Design principles:
 
@@ -75,7 +75,7 @@ graph TD
 | `server` | `config` | Embedded Tomcat, Jersey, Guice/HK2 bridges |
 | `launcher` | `config`, `persistence`, `server`, `initializer`, `app` | Application composition root and `main` |
 | `initializer` | `persistence` | Generic entity and repository registration |
-| `http-exceptions` | — | Runtime exception per HTTP/WebDAV error status code |
+| `http-exceptions` | — | HTTP/WebDAV error exceptions and JAX-RS `ExceptionMapper` |
 | `app` | `config`, `persistence`, `server`, `initializer` | Application layer (see [APPLICATION.md](APPLICATION.md)) |
 
 The parent POM (`com.onix322:fleet:1.0-SNAPSHOT`, packaging `pom`) declares the shared dependency versions and the Java 21 compiler configuration.

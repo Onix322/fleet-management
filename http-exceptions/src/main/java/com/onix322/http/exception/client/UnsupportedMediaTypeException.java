@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Unsupported Media Type exception.
+ * Status 415 Unsupported Media Type exception.
  */
 public class UnsupportedMediaTypeException extends HttpException {
 
     public UnsupportedMediaTypeException() {
-        super(HttpStatusCode.UNSUPPORTED_MEDIA_TYPE);
+        super(Response.Status.UNSUPPORTED_MEDIA_TYPE);
     }
 
     public UnsupportedMediaTypeException(String message) {
-        super(HttpStatusCode.UNSUPPORTED_MEDIA_TYPE, message);
+        super(Response.Status.UNSUPPORTED_MEDIA_TYPE, message);
     }
 
     public UnsupportedMediaTypeException(String message, Throwable cause) {
-        super(HttpStatusCode.UNSUPPORTED_MEDIA_TYPE, message, cause);
+        super(Response.Status.UNSUPPORTED_MEDIA_TYPE, message, cause);
     }
 
     public UnsupportedMediaTypeException(Throwable cause) {
-        super(HttpStatusCode.UNSUPPORTED_MEDIA_TYPE, cause);
+        super(Response.Status.UNSUPPORTED_MEDIA_TYPE, cause);
     }
 }

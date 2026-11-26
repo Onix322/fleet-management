@@ -1,26 +1,27 @@
 package com.onix322.http.exception.server;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import com.onix322.http.exception.ExtendedStatus;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Variant Also Negotiates exception.
+ * Status 506 Variant Also Negotiates exception.
  */
 public class VariantAlsoNegotiatesException extends HttpException {
 
     public VariantAlsoNegotiatesException() {
-        super(HttpStatusCode.VARIANT_ALSO_NEGOTIATES);
+        super(ExtendedStatus.VARIANT_ALSO_NEGOTIATES);
     }
 
     public VariantAlsoNegotiatesException(String message) {
-        super(HttpStatusCode.VARIANT_ALSO_NEGOTIATES, message);
+        super(ExtendedStatus.VARIANT_ALSO_NEGOTIATES, message);
     }
 
     public VariantAlsoNegotiatesException(String message, Throwable cause) {
-        super(HttpStatusCode.VARIANT_ALSO_NEGOTIATES, message, cause);
+        super(ExtendedStatus.VARIANT_ALSO_NEGOTIATES, message, cause);
     }
 
     public VariantAlsoNegotiatesException(Throwable cause) {
-        super(HttpStatusCode.VARIANT_ALSO_NEGOTIATES, cause);
+        super(ExtendedStatus.VARIANT_ALSO_NEGOTIATES, cause);
     }
 }

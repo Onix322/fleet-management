@@ -3,6 +3,7 @@ package com.onix322.launcher;
 import com.google.inject.AbstractModule;
 import com.onix322.app.guice.AppModule;
 import com.onix322.config.guice.ConfigModule;
+import com.onix322.http.exception.guice.HttpExceptionModule;
 import com.onix322.persistence.guice.PersistenceModule;
 import com.onix322.server.Server;
 import com.onix322.server.guice.ServerModule;
@@ -14,6 +15,7 @@ public class LauncherModule extends AbstractModule {
         install(new ServerModule());
         install(new ConfigModule());
         install(new PersistenceModule());
+        install(new HttpExceptionModule());
         install(new AppModule());
     }
 

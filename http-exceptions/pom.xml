@@ -13,5 +13,30 @@
     <artifactId>http-exceptions</artifactId>
     <packaging>jar</packaging>
     <name>http-exceptions</name>
-    <description>Runtime exception for every HTTP and WebDAV error status code.</description>
+    <description>HTTP/WebDAV error exceptions and their JAX-RS ExceptionMapper.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- No annotation processors in this module. -->
+                    <proc>none</proc>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

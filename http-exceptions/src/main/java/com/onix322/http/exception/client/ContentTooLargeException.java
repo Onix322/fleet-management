@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Content Too Large exception.
+ * Status 413 Content Too Large exception.
  */
 public class ContentTooLargeException extends HttpException {
 
     public ContentTooLargeException() {
-        super(HttpStatusCode.CONTENT_TOO_LARGE);
+        super(Response.Status.REQUEST_ENTITY_TOO_LARGE);
     }
 
     public ContentTooLargeException(String message) {
-        super(HttpStatusCode.CONTENT_TOO_LARGE, message);
+        super(Response.Status.REQUEST_ENTITY_TOO_LARGE, message);
     }
 
     public ContentTooLargeException(String message, Throwable cause) {
-        super(HttpStatusCode.CONTENT_TOO_LARGE, message, cause);
+        super(Response.Status.REQUEST_ENTITY_TOO_LARGE, message, cause);
     }
 
     public ContentTooLargeException(Throwable cause) {
-        super(HttpStatusCode.CONTENT_TOO_LARGE, cause);
+        super(Response.Status.REQUEST_ENTITY_TOO_LARGE, cause);
     }
 }

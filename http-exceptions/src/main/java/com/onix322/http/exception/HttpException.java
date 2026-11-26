@@ -1,53 +1,52 @@
 package com.onix322.http.exception;
 
+import jakarta.ws.rs.core.Response;
+import lombok.Getter;
+
 import java.io.Serial;
 
 /**
- * Base type for every HTTP/WebDAV status exception.
+ * Base type for every HTTP/WebDAV error status exception.
  *
  * <p>All status exceptions are unchecked, so a single {@code catch (HttpException e)}
- * or a single {@code ExceptionMapper<HttpException>} handles every code.</p>
+ * or a single {@link HttpExceptionMapper} handles every code.</p>
  */
 public class HttpException extends RuntimeException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private final HttpStatusCode status;
+    private final Response.StatusType status;
 
-    public HttpException(HttpStatusCode status) {
-        super(requireStatus(status).reason());
+    public HttpException(Response.StatusType status) {
+        super(requireStatus(status).getReasonPhrase());
         this.status = status;
     }
 
-    public HttpException(HttpStatusCode status, String message) {
-        super(message != null ? message : requireStatus(status).reason());
+    public HttpException(Response.StatusType status, String message) {
+        super(message != null ? message : requireStatus(status).getReasonPhrase());
         this.status = status;
     }
 
-    public HttpException(HttpStatusCode status, Throwable cause) {
-        super(requireStatus(status).reason(), cause);
+    public HttpException(Response.StatusType status, Throwable cause) {
+        super(requireStatus(status).getReasonPhrase(), cause);
         this.status = status;
     }
 
-    public HttpException(HttpStatusCode status, String message, Throwable cause) {
-        super(message != null ? message : requireStatus(status).reason(), cause);
+    public HttpException(Response.StatusType status, String message, Throwable cause) {
+        super(message != null ? message : requireStatus(status).getReasonPhrase(), cause);
         this.status = status;
-    }
-
-    public HttpStatusCode getStatus() {
-        return status;
     }
 
     public int getStatusCode() {
-        return status.code();
+        return status.getStatusCode();
     }
 
     public String getReason() {
-        return status.reason();
+        return status.getReasonPhrase();
     }
 
-    private static HttpStatusCode requireStatus(HttpStatusCode status) {
+    private static Response.StatusType requireStatus(Response.StatusType status) {
         if (status == null) {
             throw new IllegalArgumentException("status must not be null");
         }

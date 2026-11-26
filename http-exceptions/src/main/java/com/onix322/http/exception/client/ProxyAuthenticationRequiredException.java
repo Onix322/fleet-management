@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Proxy Authentication Required exception.
+ * Status 407 Proxy Authentication Required exception.
  */
 public class ProxyAuthenticationRequiredException extends HttpException {
 
     public ProxyAuthenticationRequiredException() {
-        super(HttpStatusCode.PROXY_AUTHENTICATION_REQUIRED);
+        super(Response.Status.PROXY_AUTHENTICATION_REQUIRED);
     }
 
     public ProxyAuthenticationRequiredException(String message) {
-        super(HttpStatusCode.PROXY_AUTHENTICATION_REQUIRED, message);
+        super(Response.Status.PROXY_AUTHENTICATION_REQUIRED, message);
     }
 
     public ProxyAuthenticationRequiredException(String message, Throwable cause) {
-        super(HttpStatusCode.PROXY_AUTHENTICATION_REQUIRED, message, cause);
+        super(Response.Status.PROXY_AUTHENTICATION_REQUIRED, message, cause);
     }
 
     public ProxyAuthenticationRequiredException(Throwable cause) {
-        super(HttpStatusCode.PROXY_AUTHENTICATION_REQUIRED, cause);
+        super(Response.Status.PROXY_AUTHENTICATION_REQUIRED, cause);
     }
 }

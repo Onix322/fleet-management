@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Gone exception.
+ * Status 410 Gone exception.
  */
 public class GoneException extends HttpException {
 
     public GoneException() {
-        super(HttpStatusCode.GONE);
+        super(Response.Status.GONE);
     }
 
     public GoneException(String message) {
-        super(HttpStatusCode.GONE, message);
+        super(Response.Status.GONE, message);
     }
 
     public GoneException(String message, Throwable cause) {
-        super(HttpStatusCode.GONE, message, cause);
+        super(Response.Status.GONE, message, cause);
     }
 
     public GoneException(Throwable cause) {
-        super(HttpStatusCode.GONE, cause);
+        super(Response.Status.GONE, cause);
     }
 }

@@ -1,26 +1,26 @@
 package com.onix322.http.exception.client;
 
 import com.onix322.http.exception.HttpException;
-import com.onix322.http.exception.HttpStatusCode;
+import jakarta.ws.rs.core.Response;
 
 /**
- * Status Bad Request exception.
+ * Status 400 Bad Request exception.
  */
 public class BadRequestException extends HttpException {
 
     public BadRequestException() {
-        super(HttpStatusCode.BAD_REQUEST);
+        super(Response.Status.BAD_REQUEST);
     }
 
     public BadRequestException(String message) {
-        super(HttpStatusCode.BAD_REQUEST, message);
+        super(Response.Status.BAD_REQUEST, message);
     }
 
     public BadRequestException(String message, Throwable cause) {
-        super(HttpStatusCode.BAD_REQUEST, message, cause);
+        super(Response.Status.BAD_REQUEST, message, cause);
     }
 
     public BadRequestException(Throwable cause) {
-        super(HttpStatusCode.BAD_REQUEST, cause);
+        super(Response.Status.BAD_REQUEST, cause);
     }
 }
