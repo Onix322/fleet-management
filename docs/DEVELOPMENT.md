@@ -321,7 +321,7 @@ Test sources belong in each module's `src/test/java` directory. The current suit
 | `persistence` | `BaseRepositoryTest` | `BaseRepository` CRUD and criteria queries with a mocked `ORM`/`EntityManager` |
 | `initializer` | `TypeFactoryTest` | reflective generic repository creation and member injection |
 | `app` | `VanControllerTest` | controller status codes and response bodies with a mocked service |
-| `app` | `InspectionReportControllerTest` | controller status codes and response bodies with a mocked service |
+| `app` | `ReportControllerTest` | controller status codes and response bodies with a mocked service |
 | `app` | `VehicleServiceTest` | service validation and repository delegation with a mocked repository |
 
 The `app` test packages use an `integration` name, but the tests do not start a database or an HTTP container. Add a separate integration test setup when persistence behavior against PostgreSQL must be verified.

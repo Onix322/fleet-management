@@ -1,7 +1,8 @@
 package com.onix322.app.integration.raport;
 
 import com.onix322.app.report.resource.controller.InspectionReportController;
-import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
+import com.onix322.app.report.resource.model.impl.dao.ReportInspection;
+import com.onix322.app.report.resource.service.InspectionReportService;
 import com.onix322.app.report.resource.service.ReportService;
 import com.onix322.http.exception.client.NotFoundException;
 import com.onix322.http.exception.server.InternalServerErrorException;
@@ -21,12 +22,13 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class InspectionReportControllerTest {
+public class ReportControllerTest {
 
     @Mock
-    private ReportService<InspectionReport> reportService;
+    private InspectionReportService reportService;
 
     private InspectionReportController reportController;
 
@@ -39,21 +41,21 @@ public class InspectionReportControllerTest {
     @MethodSource("createScenarios")
     public void testCreateMethod(Response.Status expectedStatus, Exception thrown) {
         // Given
-        InspectionReport inspectionReport = new InspectionReport();
+        ReportInspection reportInspection = new ReportInspection();
 
         if (thrown != null) {
-            when(this.reportService.create(inspectionReport)).thenThrow(thrown);
-            assertThrows(Exception.class, () -> this.reportController.create(inspectionReport));
+            when(this.reportService.create(reportInspection)).thenThrow(thrown);
+            assertThrows(Exception.class, () -> this.reportController.create(reportInspection));
             return;
         }
 
         // When
-        when(this.reportService.create(inspectionReport)).thenReturn(inspectionReport);
-        Response response = this.reportController.create(inspectionReport);
+        when(this.reportService.create(reportInspection)).thenReturn(reportInspection);
+        Response response = this.reportController.create(reportInspection);
         // Then
         assertEquals(expectedStatus.getStatusCode(), response.getStatus());
         assertNotNull(response.getEntity());
-        assertEquals(inspectionReport, response.getEntity());
+        assertEquals(reportInspection, response.getEntity());
 
     }
 
@@ -71,7 +73,7 @@ public class InspectionReportControllerTest {
     @MethodSource("getByIdScenarios")
     public void testGetById(Response.Status expectedStatus, Exception thrown) {
         // Given
-        InspectionReport inspectionReport = new InspectionReport();
+        ReportInspection reportInspection = new ReportInspection();
         UUID reportId = UUID.randomUUID();
 
         if (thrown != null) {
@@ -81,13 +83,13 @@ public class InspectionReportControllerTest {
         }
 
         // When
-        when(this.reportService.getById(reportId)).thenReturn(inspectionReport);
+        when(this.reportService.getById(reportId)).thenReturn(reportInspection);
 
         // Then
         Response response = this.reportController.getById(reportId);
         assertEquals(expectedStatus.getStatusCode(), response.getStatus());
         assertNotNull(response.getEntity());
-        assertEquals(inspectionReport, response.getEntity());
+        assertEquals(reportInspection, response.getEntity());
     }
 
     @ParameterizedTest

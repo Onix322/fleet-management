@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
+@Builder
 @Getter
 public class VanUpdateDto {
     private UUID id;

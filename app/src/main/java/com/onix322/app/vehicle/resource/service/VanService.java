@@ -2,10 +2,10 @@ package com.onix322.app.vehicle.resource.service;
 
 import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanReturnDto;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanSummaryDto;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanUpdateDto;
-import com.onix322.app.vehicle.resource.model.impl.mapper.VanMapper;
+import com.onix322.app.vehicle.resource.model.impl.dto.VehicleMotorizedDto;
+import com.onix322.app.vehicle.resource.model.impl.mapper.VehicleMapper;
 import com.onix322.app.vehicle.resource.repository.VehicleRepository;
 import com.onix322.http.exception.client.BadRequestException;
 import jakarta.inject.Inject;
@@ -17,31 +17,31 @@ import java.util.UUID;
 @Singleton
 public class VanService extends VehicleService<Van> {
 
-    private final VanMapper vanMapper;
+    private final VehicleMapper vanMapper;
 
     @Inject
-    public VanService(VehicleRepository<Van> vanRepository, VanMapper vanMapper) {
+    public VanService(VehicleRepository<Van> vanRepository, VehicleMapper vanMapper) {
         super(vanRepository);
         this.vanMapper = vanMapper;
     }
 
-    public VanReturnDto create(VanAddDto vanDto) {
+    public VehicleMotorizedDto create(VanAddDto vanDto) {
         if (vanDto == null) {
             throw new BadRequestException("VanDto cannot be null");
         }
         Van mappedVan = vanMapper.toVan(vanDto);
         Van createdVan = super.create(mappedVan);
-        return vanMapper.toVanDto(createdVan);
+        return vanMapper.toVehicleMotorizedDto(createdVan);
     }
 
-    public VanReturnDto update(UUID id, VanUpdateDto vanDto) {
+    public VehicleMotorizedDto update(UUID id, VanUpdateDto vanDto) {
         if (vanDto == null || id == null) {
             throw new BadRequestException("VanDto must not be null and must have an id");
         }
         Van van = super.getById(id);
         Van updateVan = vanMapper.updateVan(vanDto, van);
         Van updatedVanDto = super.update(id, updateVan);
-        return vanMapper.toVanDto(updatedVanDto);
+        return vanMapper.toVehicleMotorizedDto(updatedVanDto);
     }
 
     public List<VanSummaryDto> getAllVans() {

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.onix322.app.details.resource.model.imp.dao.VehicleDetails;
 import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
 import com.onix322.app.report.resource.model.impl.dao.DamageReport;
-import com.onix322.app.report.resource.model.impl.dao.InspectionReport;
+import com.onix322.app.report.resource.model.impl.dao.ReportInspection;
 import com.onix322.app.vehicle.resource.model.Vehicle;
 import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.util.OperationalStatus;
@@ -57,7 +57,7 @@ public abstract class VehicleAbstract implements Vehicle {
     )
     @JsonIgnoreProperties("vehicle")
     @BatchSize(size = 10)
-    private List<InspectionReport> inspectionReports;
+    private List<ReportInspection> reportInspections;
 
     @OneToMany(
             mappedBy = "vehicle",

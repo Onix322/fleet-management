@@ -17,10 +17,6 @@ import lombok.EqualsAndHashCode;
 public class ImageDamage extends ImageAbstract {
 
     @OneToOne
-    @JoinColumn(name = "details_id", referencedColumnName = "id")
-    private ImageDetails details;
-
-    @OneToOne
     @JoinColumn(name = "damage_id", referencedColumnName = "id")
     @JsonIgnoreProperties("imageDamage")
     private DamageAbstract damage;
