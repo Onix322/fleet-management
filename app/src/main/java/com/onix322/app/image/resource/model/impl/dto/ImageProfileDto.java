@@ -1,12 +1,13 @@
 package com.onix322.app.image.resource.model.impl.dto;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
 public class ImageProfileDto {
     private UUID id;
 }

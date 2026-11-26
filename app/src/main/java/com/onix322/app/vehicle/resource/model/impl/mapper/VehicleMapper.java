@@ -1,18 +1,17 @@
 package com.onix322.app.vehicle.resource.model.impl.mapper;
 
+import com.onix322.app.details.resource.model.imp.DetailsMapper;
 import com.onix322.app.details.resource.model.imp.dao.VehicleDetails;
 import com.onix322.app.details.resource.model.imp.dto.VehicleDetailsDto;
 import com.onix322.app.image.resource.model.impl.dao.ImageProfile;
 import com.onix322.app.image.resource.model.impl.dto.ImageProfileDto;
+import com.onix322.app.image.resource.model.impl.mapper.ImageMapper;
+import com.onix322.app.vehicle.resource.model.impl.VehicleAbstract;
 import com.onix322.app.vehicle.resource.model.impl.dao.Van;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanReturnDto;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanSummaryDto;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanUpdateDto;
+import com.onix322.app.vehicle.resource.model.impl.dto.*;
 import com.onix322.app.vehicle.util.adnotations.MapTo;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -21,8 +20,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Singleton
-@NoArgsConstructor(onConstructor_ = @Inject)
-public class VanMapper {
+public class VehicleMapper {
+
+    private final ImageMapper imageMapper;
+    private final DetailsMapper detailsMapper;
+
+    @Inject
+    private VehicleMapper(ImageMapper imageMapper, DetailsMapper detailsMapper) {
+        this.imageMapper = imageMapper;
+        this.detailsMapper = detailsMapper;
+    }
+
+    public VehicleDto toVehicleDto(VehicleAbstract vehicle) {
+        List<ImageProfileDto> images = imageMapper.toImageProfileDto(vehicle.getImages())
+                .stream()
+                .toList();
+
+        VehicleDetailsDto detailsDto = detailsMapper.toDetailsDto(vehicle.getDetails());
+
+        return VehicleDto.builder()
+                .images(images)
+                .details(detailsDto)
+                .operationalStatus(vehicle.getOperationalStatus())
+                .id(vehicle.getId())
+                .build();
+    }
+
 
     public Van toVan(VanAddDto vanDto) {
 
@@ -54,40 +77,33 @@ public class VanMapper {
         return van;
     }
 
-    public VanReturnDto toVanDto(Van van) {
+    public VehicleMotorizedDto toVehicleMotorizedDto(Van van) {
         if (van == null) {
             return null;
         }
 
-        VanReturnDto dto = new VanReturnDto();
-        dto.setId(van.getId());
-        dto.setLastPTI(van.getLastPTI());
-        dto.setVin(van.getVin());
-        dto.setLicensePlate(van.getLicensePlate());
-        dto.setOperationalStatus(van.getOperationalStatus());
+        List<ImageProfileDto> imagesDto = imageMapper.toImageProfileDto(van.getImages())
+                .stream()
+                .toList();
 
-        if (van.getDetails() != null) {
-            var entityDetails = van.getDetails();
-            VehicleDetailsDto detailsDto = new VehicleDetailsDto();
-            detailsDto.setBrand(entityDetails.getBrand());
-            detailsDto.setModel(entityDetails.getModel());
-            detailsDto.setConstructionYear(entityDetails.getConstructionYear());
-            detailsDto.setOwnType(entityDetails.getOwnType());
-            detailsDto.setRegistrationDate(entityDetails.getRegistrationDate());
-            dto.setDetails(detailsDto);
-        }
+        VehicleDetailsDto vehicleDetailsDto = VehicleDetailsDto
+                .builder()
+                .registrationDate(van.getDetails().getRegistrationDate())
+                .ownType(van.getDetails().getOwnType())
+                .constructionYear(van.getDetails().getConstructionYear())
+                .brand(van.getDetails().getBrand())
+                .model(van.getDetails().getModel())
+                .build();
 
-        List<ImageProfileDto> imagesDto = new ArrayList<>();
-        for (var imageProfile : van.getImages()) {
-            if (imageProfile == null) {
-                continue;
-            }
-            ImageProfileDto imageDto = new ImageProfileDto();
-            imagesDto.add(imageDto);
-        }
-        dto.setImages(imagesDto);
-
-        return dto;
+        return VehicleMotorizedDto
+                .builder()
+                .details(vehicleDetailsDto)
+                .id(van.getId())
+                .images(imagesDto)
+                .lastPTI(van.getLastPTI())
+                .licensePlate(van.getLicensePlate())
+                .operationalStatus(van.getOperationalStatus())
+                .build();
     }
 
     public Van updateVan(VanUpdateDto vanDto, Van existingVan) {
@@ -125,8 +141,9 @@ public class VanMapper {
     }
 
     public VanSummaryDto toVanSummaryDto(Van van) {
-        ImageProfileDto imageProfileDto = new ImageProfileDto();
-        imageProfileDto.setId(van.getImages().getFirst().getId());
+        ImageProfileDto imageProfileDto = ImageProfileDto.builder()
+                .id(van.getImages().getFirst().getId())
+                .build();
         return new VanSummaryDto(
                 van.getId(),
                 van.getLicensePlate(),
@@ -155,3 +172,4 @@ public class VanMapper {
         return targetClass.getDeclaredField(targetFieldName);
     }
 }
+

@@ -10,6 +10,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Entity
-public class InspectionReport extends ReportAbstract {
+public class ReportInspection extends ReportAbstract {
 
 }

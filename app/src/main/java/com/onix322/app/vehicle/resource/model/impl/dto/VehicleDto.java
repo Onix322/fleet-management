@@ -5,19 +5,15 @@ import com.onix322.app.image.resource.model.impl.dto.ImageProfileDto;
 import com.onix322.app.vehicle.util.OperationalStatus;
 import lombok.*;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Setter
 @Getter
-public class VanReturnDto {
+@Builder
+public class VehicleDto {
     private UUID id;
-    private String vin;
-    private Date lastPTI;
-    private String licensePlate;
     private VehicleDetailsDto details;
     private OperationalStatus operationalStatus;
     private List<ImageProfileDto> images;

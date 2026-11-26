@@ -3,9 +3,8 @@ package com.onix322.app.integration.vehicle;
 import com.onix322.app.vehicle.resource.controller.VanController;
 import com.onix322.app.vehicle.resource.model.impl.dao.Van;
 import com.onix322.app.vehicle.resource.model.impl.dto.VanAddDto;
-import com.onix322.app.vehicle.resource.model.impl.dto.VanReturnDto;
+import com.onix322.app.vehicle.resource.model.impl.dto.VehicleMotorizedDto;
 import com.onix322.app.vehicle.resource.service.VanService;
-import com.onix322.app.vehicle.resource.service.VehicleService;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +46,7 @@ public class VanControllerTest {
     @MethodSource("createdScenarios")
     public void testCreatedMethodWhenException(Response.Status expectedStatus, Exception thrown) {
         VanAddDto given = new VanAddDto();
-        VanReturnDto expected = new VanReturnDto();
+        VehicleMotorizedDto expected = VehicleMotorizedDto.builder().build();
 
         if (thrown == null) {
             when(this.vanService.create(given)).thenReturn(expected);
