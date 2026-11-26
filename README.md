@@ -27,7 +27,7 @@ Fleet Management is split into a framework layer, a support module, and an appli
 | Layer | Modules | Change profile |
 | --- | --- | --- |
 | Framework | `config`, `persistence`, `server`, `launcher` | Stable technical infrastructure and contracts |
-| Support | `initializer` | Generic repository/entity registration used by application feature modules |
+| Support | `initializer`, `http-exceptions` | Generic repository/entity registration; runtime exception per HTTP error status |
 | Application | `app` | Fleet-management features, REST resources, and entities; evolves frequently |
 
 The framework provides configuration, persistence, and HTTP hosting behind contracts. It ships with **PostgreSQL** and **Hibernate** as the default `Database` and `ORM` implementations; the application composes those contracts into fleet-management features.
@@ -99,6 +99,7 @@ graph TD
 | `server` | Framework | `Server` contract; embedded Tomcat, Jersey servlet, Guice/HK2 bridges |
 | `launcher` | Framework | `LauncherModule`, the composition root, and the application entry point |
 | `initializer` | Support | `InitializerModule` and `TypeFactory` for generic repositories and entity registration |
+| `http-exceptions` | Support | Runtime exception per HTTP/WebDAV error status; full status catalogue |
 | `app` | Application | Feature modules, JAX-RS resources, domain model, JPA entities |
 
 Framework modules are documented in [docs/FRAMEWORK.md](docs/FRAMEWORK.md). The application layer is documented in [docs/APPLICATION.md](docs/APPLICATION.md).
